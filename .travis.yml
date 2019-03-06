@@ -1,7 +1,8 @@
 sudo: false
+dist: xenial
 language: python
 python:
-  - 3.7
+  - 3.7.1
 install:
   - pip3 install -r requirements.txt
 script:
