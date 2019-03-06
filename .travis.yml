@@ -10,4 +10,4 @@ script:
 env:
   - CODECOV_TOKEN="a7891cfa-6e25-46f4-a46b-abedaa6a7dfe"
 after_success:
-  - codecov
+  - codecov -t
