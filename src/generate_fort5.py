@@ -34,6 +34,6 @@ def generate_uniform_random(n_particles, box, path=''):
             out_file.write(f'Molecule # {i+1}\n')
             out_file.write(f'{atoms_per_mol}\n')
             out_file.write(f'{i+1} {label} {label_index} {n_bonds} ')
-            out_file.write(f'{x[i]} {y[i]} {z[i]}')
-            out_file.write(f'{bond1} {bond2} {bond3} {bond4} {bond5} {bond5}')
+            out_file.write(f'{x[i]} {y[i]} {z[i]} ')
+            out_file.write(f'{bond1} {bond2} {bond3} {bond4} {bond5} {bond6}')
             out_file.write('\n')

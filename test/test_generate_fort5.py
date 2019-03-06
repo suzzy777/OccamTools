@@ -49,14 +49,34 @@ def test_generate_random_uniform():
         # Number of particles:
         # 10
         line = in_file.readline().strip()
-        sline = line.split()
-        assert len(sline) == 3
+        line = line.split()
+        assert len(line) == 3
         expected = ['Number', 'of', 'particles:']
         for i, e in enumerate(expected):
-            assert sline[i] == e
+            assert line[i] == e
+        line = in_file.readline().strip()
+        assert int(line) == n_particles
 
-        for i in range(n_particles):
-            pass
+        for i in range(1, n_particles+1):
+            # Expected:
+            # -----------------------------------------------------------------
+            # Molecule # 1
+            # 1
+            # 1 Ar 1 0 0.642649076 3.78051288 3.6288812 0 0 0 0 0 0
+            line = in_file.readline()
+            line = line.split()
+            assert int(line[-1]) == i
+
+            line = in_file.readline().strip()
+            assert int(line) == 1
+
+            line = in_file.readline()
+            line = line.split()
+            assert len(line) == 13
+            x, y, z = [float(p) for p in line[4:7]]
+            assert x <= box[0]
+            assert y <= box[1]
+            assert z <= box[2]
 
         if os.path.exists(file_name):
             os.remove(file_name)
