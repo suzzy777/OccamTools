@@ -90,9 +90,9 @@ def xyz_to_fort5(file_name, wrap, box, new_file_name='fort.5'):
 
         for atom_ind in range(1, n_molecules):
             line = in_file.readline().split()
-            type = line[0]
+            label = line[0]
             pos = [float(l) for l in line[1:]]
             for i, x in enumerate(pos):
                 pos[i] = _ensure_inside_box(x, box, wrap)
             x, y, z = pos
-            _write_molecule(out_file, atom_ind, x, y, z, label=type)
+            _write_molecule(out_file, atom_ind, x, y, z, label=label)
