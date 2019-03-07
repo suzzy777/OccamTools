@@ -129,7 +129,3 @@ def test_convert_file_name():
     assert '.' in converted_file
     converted_file = converted_file.split('.')
     assert converted_file[-1] == 'xyz'
-
-
-if __name__ == '__main__':
-    test_fort5_to_xyz_wrap()
