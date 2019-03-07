@@ -194,36 +194,14 @@ def test_generate_fcc_n_particles():
     assert _check_remove_file(file_name)
 
 
-def test_generate_fcc_positions():
-    file_name = os.path.join(os.path.dirname(__file__), 'fcc_pos_test.5')
+def test_generate_fcc_positions_velocities():
+    file_name = os.path.join(os.path.dirname(__file__), 'fcc_pos_vel_test.5')
     _check_remove_file(file_name)
 
     lattice_constant = 9.259825981095232
     b = lattice_constant
     cell_box = [3, 2, 4]
-    n_particles = generate_fcc(cell_box, lattice_constant, path=file_name)
-
-    with open(file_name, 'r') as in_file:
-        for _ in range(4):
-            line = in_file.readline()
-
-        for _ in range(n_particles):
-            for _ in range(2):
-                line = in_file.readline()
-            line = in_file.readline().split()
-            assert len(line) == 13
-            for p in line[4:7]:
-                assert np.mod(float(p), 0.5*b) == pytest.approx(0.0, abs=1e-15)
-
-    assert _check_remove_file(file_name)
-
-
-def test_generate_fcc_velocity():
-    file_name = os.path.join(os.path.dirname(__file__), 'fcc_pos_test.5')
-    _check_remove_file(file_name)
-
-    cell_box = [2, 2, 2]
-    n_particles = generate_fcc(cell_box, 1.0, velocity=True, path=file_name)
+    n_particles = generate_fcc(cell_box, b, velocity=True, path=file_name)
 
     with open(file_name, 'r') as in_file:
         for _ in range(4):
@@ -234,7 +212,9 @@ def test_generate_fcc_velocity():
                 line = in_file.readline()
             line = in_file.readline().split()
             assert len(line) == 16
+            for p in line[4:7]:
+                assert np.mod(float(p), 0.5*b) == pytest.approx(0.0, abs=1e-15)
             for p in line[7:10]:
                 assert float(p) == pytest.approx(0.0, abs=1e-15)
-                
-    _check_remove_file(file_name)
+
+    assert _check_remove_file(file_name)
