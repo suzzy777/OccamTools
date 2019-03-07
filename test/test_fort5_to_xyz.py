@@ -6,7 +6,7 @@ from test_generate_fort5 import _check_remove_file
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 from generate_fort5 import generate_uniform_random  # noqa: E402
-from fort5_to_xyz import fort5_to_xyz  # noqa: E402
+from fort5_to_xyz import fort5_to_xyz, _convert_file_name  # noqa: E402
 
 
 def _remove_files(*files):
@@ -89,6 +89,8 @@ def test_fort5_to_xyz_wrap():
         contents[1] = '{box_x:.15f} {box_y:.15f} {box_z:.15f}\n'.format(
             box_x=new_box[0], box_y=new_box[1], box_z=new_box[2]
         )
+        label = 'Ar'
+        contents[2] = f'{label} {-58.2958285258925:.15f} {9:.15f} {190:.15f}\n'
         for line in contents:
             out_file.write(line)
 
@@ -107,3 +109,16 @@ def test_fort5_to_xyz_wrap():
                 assert p > 0.0
 
     _remove_files(file_name, xyz_file_name, changed_file)
+
+
+def test_convert_file_name():
+    file_name = os.path.join(os.path.dirname(__file__), 'fort.5')
+    converted_file = _convert_file_name(file_name)
+    converted_file = converted_file.split('.')
+    assert converted_file[-1] == 'xyz'
+
+    file_name = os.path.join(os.path.dirname(file_name), 'fort')
+    converted_file = _convert_file_name(file_name)
+    assert '.' in converted_file
+    converted_file = converted_file.split('.')
+    assert converted_file[-1] == 'xyz'
