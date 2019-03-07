@@ -39,7 +39,7 @@ def test_fort5_to_xyz_file():
 
 
 def test_fort5_to_xyz_box():
-    file_name, _, box, xyz_file_name = _setup_minimal_and_convert()
+    file_name, _, _, xyz_file_name = _setup_minimal_and_convert()
 
     with open(file_name, 'r') as fort5, open(xyz_file_name, 'r') as xyz:
         xyz_line = xyz.readline()
@@ -56,7 +56,7 @@ def test_fort5_to_xyz_box():
 
 
 def test_fort5_to_xyz_positions():
-    file_name, n_particles, box, xyz_file_name = _setup_minimal_and_convert(
+    file_name, n_particles, _, xyz_file_name = _setup_minimal_and_convert(
         wrap=False
     )
 
