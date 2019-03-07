@@ -5,8 +5,7 @@ import numpy as np
 from test_generate_fort5 import _check_remove_file
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
-from generate_fort5 import (generate_uniform_random,
-                            _write_molecule)  # noqa: E402
+from generate_fort5 import generate_uniform_random  # noqa: E402
 from fort5_to_xyz import fort5_to_xyz, _convert_file_name  # noqa: E402
 
 
