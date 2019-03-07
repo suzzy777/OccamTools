@@ -1,12 +1,13 @@
 import os
 import sys
 import pytest
+import numpy as np
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
-from generate_fort5 import generate_uniform_random  # noqa: E402
+from generate_fort5 import generate_uniform_random, generate_fcc  # noqa: E402
 
 
-def check_remove_file(file_name):
+def _check_remove_file(file_name):
     if os.path.exists(file_name):
         os.remove(file_name)
         return True
@@ -19,10 +20,10 @@ def test_generate_random_uniform_path():
     # the given path.
     path = os.path.join(os.path.dirname(__file__), '..')
     path_file = os.path.join(os.path.join(path, 'fort.5'))
-    check_remove_file(path_file)
+    _check_remove_file(path_file)
 
     generate_uniform_random(1, [1, 1, 1], path=path)
-    assert check_remove_file(path_file)
+    assert _check_remove_file(path_file)
 
 
 def test_generate_random_uniform_file():
@@ -30,15 +31,15 @@ def test_generate_random_uniform_file():
     # the specified path is created.
     file_name = 'fort.5'
     file_name = os.path.join(os.path.dirname(__file__), file_name)
-    check_remove_file(file_name)
+    _check_remove_file(file_name)
 
     generate_uniform_random(2, [2, 3, 4], path=file_name)
-    assert check_remove_file(file_name)
+    assert _check_remove_file(file_name)
 
 
 def test_generate_random_uniform_header():
     file_name = os.path.join(os.path.dirname(__file__), 'header_test.5')
-    check_remove_file(file_name)
+    _check_remove_file(file_name)
 
     n_particles = 10
     box = [2, 7, 11]
@@ -59,12 +60,12 @@ def test_generate_random_uniform_header():
             assert float(line[i]) == pytest.approx(box[i], abs=1e-15)
             assert float(line[3]) == pytest.approx(0.0, abs=1e-15)
 
-    assert check_remove_file(file_name)
+    assert _check_remove_file(file_name)
 
 
 def test_generate_random_uniform_n_molecules():
     file_name = os.path.join(os.path.dirname(__file__), 'molecules_test.5')
-    check_remove_file(file_name)
+    _check_remove_file(file_name)
 
     n_particles = 10
     box = [2, 2, 2]
@@ -88,10 +89,12 @@ def test_generate_random_uniform_n_molecules():
         line = in_file.readline().strip()
         assert int(line) == n_particles
 
+    assert _check_remove_file(file_name)
+
 
 def test_generate_random_uniform_positions():
     file_name = os.path.join(os.path.dirname(__file__), 'pos_test.5')
-    check_remove_file(file_name)
+    _check_remove_file(file_name)
 
     n_particles = 100
     box = [9.29580019,
@@ -125,12 +128,91 @@ def test_generate_random_uniform_positions():
             assert y <= box[1]
             assert z <= box[2]
 
-    check_remove_file(file_name)
+    _check_remove_file(file_name)
 
 
-if __name__ == '__main__':
-    test_generate_random_uniform_path()
-    test_generate_random_uniform_file()
-    test_generate_random_uniform_header()
-    test_generate_random_uniform_n_molecules()
-    test_generate_random_uniform_positions()
+def test_generate_fcc_box():
+    file_name = os.path.join(os.path.dirname(__file__), 'fcc_box_test.5')
+    _check_remove_file(file_name)
+
+    lattice_constant = 7.2598259
+    cell_box = [3, 1, 4]
+    generate_fcc(cell_box, lattice_constant, velocity=False, path=file_name)
+
+    with open(file_name, 'r') as in_file:
+        line = in_file.readline()
+        line = in_file.readline().split()
+        assert len(line) == 4
+        expected = [lattice_constant * b for b in cell_box]
+        for box, ex in zip(line[:3], expected):
+            assert float(box) == pytest.approx(ex, abs=1e-15)
+
+    assert _check_remove_file(file_name)
+
+
+def test_generate_fcc_box_nonint():
+    cell_boxes = np.ones(shape=(5, 3))
+    cell_boxes[0, 1] = 10.0
+    cell_boxes[1, 2] = 9.0
+    cell_boxes[2, 1] = -1
+    cell_boxes[3, 0] = 7.1
+    cell_boxes[4, 1] = 1.259895
+    should_trow = [False,
+                   False,
+                   True,
+                   True,
+                   True]
+    for should_catch, box in zip(should_trow, cell_boxes):
+        caught = False
+        try:
+            file_name = os.path.join(os.path.dirname(__file__), 'int_test.5')
+            _check_remove_file(file_name)
+            generate_fcc(box, 1.0, path=file_name)
+        except ValueError:
+            caught = True
+        assert caught is should_catch
+        _check_remove_file(file_name)
+
+
+def test_generate_fcc_n_particles():
+    file_name = os.path.join(os.path.dirname(__file__), 'fcc_n_test.5')
+    _check_remove_file(file_name)
+
+    lattice_constant = 1.0
+    cell_box = [3, 7, 4]
+    generate_fcc(cell_box, lattice_constant, velocity=False, path=file_name)
+
+    with open(file_name, 'r') as in_file:
+        for _ in range(3):
+            line = in_file.readline()
+
+        line = in_file.readline().strip()
+        assert float(line) == int(line)
+        expected = 4 * np.prod(np.asarray(cell_box))
+        assert int(line) == expected
+
+    assert _check_remove_file(file_name)
+
+
+def test_generate_fcc_positions():
+    file_name = os.path.join(os.path.dirname(__file__), 'fcc_pos_test.5')
+    _check_remove_file(file_name)
+
+    lattice_constant = 9.259825981095232
+    b = lattice_constant
+    cell_box = [3, 2, 4]
+    n_particles = generate_fcc(cell_box, lattice_constant, path=file_name)
+
+    with open(file_name, 'r') as in_file:
+        for _ in range(4):
+            line = in_file.readline()
+
+        for _ in range(n_particles):
+            for _ in range(2):
+                line = in_file.readline()
+            line = in_file.readline().split()
+            assert len(line) == 13
+            for p in line[4:7]:
+                assert np.mod(float(p), 0.5*b) == pytest.approx(0.0, abs=1e-15)
+
+    assert _check_remove_file(file_name)
