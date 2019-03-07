@@ -5,7 +5,8 @@ import numpy as np
 from test_generate_fort5 import _check_remove_file
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
-from generate_fort5 import generate_uniform_random  # noqa: E402
+from generate_fort5 import (generate_uniform_random,
+                            _write_molecule)  # noqa: E402
 from fort5_to_xyz import fort5_to_xyz, _convert_file_name  # noqa: E402
 
 
@@ -89,11 +90,18 @@ def test_fort5_to_xyz_wrap():
         contents[1] = '{box_x:.15f} {box_y:.15f} {box_z:.15f}\n'.format(
             box_x=new_box[0], box_y=new_box[1], box_z=new_box[2]
         )
-        label = 'Ar'
-        contents[2] = f'{label} {-58.2958285258925:.15f} {9:.15f} {190:.15f}\n'
+        c = contents[6].split()
+        c[4] = '-51.952895859825259'
+        c[5] = '-1.0595205025025902'
+        c[6] = '-9081.2958928591859825'
+        contents[6] = ' '.join(c) + '\n'
         for line in contents:
             out_file.write(line)
 
+    with open(changed_file, 'r') as in_file:
+        lines = in_file.readlines()
+        for l in lines:
+            print(repr(l))
     xyz_file_name = fort5_to_xyz(changed_file)
 
     with open(xyz_file_name, 'r') as in_file:
@@ -122,3 +130,7 @@ def test_convert_file_name():
     assert '.' in converted_file
     converted_file = converted_file.split('.')
     assert converted_file[-1] == 'xyz'
+
+
+if __name__ == '__main__':
+    test_fort5_to_xyz_wrap()
