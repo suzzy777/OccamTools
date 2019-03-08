@@ -30,7 +30,7 @@ class Fort7:
         self.current_index = 0
         while self._parse_step(in_file):
             self.current_index += 1
-        self._prune_arrays
+        self._prune_arrays()
         self._parse_final_avg(in_file)
 
     def _parse_step(self, in_file):
@@ -69,8 +69,6 @@ class Fort7:
         with open(self.file_name, 'r') as in_file:
             while True:
                 line = in_file.readline()
-                if not line:
-                    break
                 line = line.split()
                 if line:  # Make sure the line isnt empty, ''
                     if 'title' in line[0]:
