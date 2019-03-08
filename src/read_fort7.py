@@ -73,8 +73,8 @@ class Fort7:
                 if line:  # Make sure the line isnt empty, ''
                     if 'title' in line[0]:
                         self.title = line[1].strip()
-                    elif 'number of atoms' in line[0]:
-                        self.n_particles = int(line[1].strip())
+                    elif 'number of atoms' in ' '.join(line):
+                        self.n_particles = int(line[-1].strip())
                     elif 'cutoff' in line[0]:
                         self.cutoff = float(line[-1].strip())
                     elif 'box' in line[0]:
