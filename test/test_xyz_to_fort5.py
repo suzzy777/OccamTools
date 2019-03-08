@@ -82,7 +82,11 @@ def test_check_box():
     assert caught_diff
 
     box_ = _check_box(box, box)
-    assert box_ == pytest.approx(box, abs=1e-15)
+    assert np.allclose(box_, box)
+    box_ = _check_box(None, box)
+    assert np.allclose(box_, box)
+    box_ = _check_box(box, None)
+    assert np.allclose(box_, box)
 
 
 def test_xyz_to_fort5_file():

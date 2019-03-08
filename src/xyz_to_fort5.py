@@ -58,6 +58,8 @@ def _check_box(file_box, arg_box):
         if arg_box is None:
             raise ValueError("No box size found in comment string ",
                              " and no box size specified on cmd line.")
+        else:
+            box = arg_box
     else:
         if arg_box is not None:
             if not np.allclose(np.asarray(file_box),
