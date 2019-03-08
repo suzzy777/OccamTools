@@ -71,6 +71,6 @@ def test_read_fort1_file_contents():
     assert fort1.dt == pytest.approx(0.03, abs=1e-15)
     assert fort1.adaptive_region_start == pytest.approx(50.0, abs=1e-15)
 
-    assert type(fort1.angle_function) == int
-    assert type(fort1.temperature_coupl) == float
-    assert type(fort1.velocity_read) == bool
+    assert isinstance(fort1.angle_function, int)
+    assert isinstance(fort1.temperature_coupl, float)
+    assert isinstance(fort1.velocity_read, bool)
