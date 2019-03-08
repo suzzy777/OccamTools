@@ -90,7 +90,7 @@ def test_check_box():
 
 
 def test_xyz_to_fort5_file():
-    file_name, n_particles, box = _generate_minimal_xyz()
+    file_name, _, box = _generate_minimal_xyz()
     tmp_file = os.path.join(os.path.dirname(__file__), 'tmp.5')
     new_file_name = xyz_to_fort5(file_name, False, box, new_file_name=tmp_file)
     assert new_file_name == tmp_file
