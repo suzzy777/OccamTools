@@ -99,7 +99,7 @@ def test_xyz_to_fort5_file():
 
 
 def test_xyz_to_fort5_default_file():
-    file_name, n_particles, box = _generate_minimal_xyz()
+    file_name, _, box = _generate_minimal_xyz()
     new_file_name = xyz_to_fort5(file_name, True, box)
     assert new_file_name == 'fort.5'
     assert _check_remove_file(new_file_name)
