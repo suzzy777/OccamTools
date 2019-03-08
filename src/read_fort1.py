@@ -28,7 +28,7 @@ class Fort1:
         elif 'time_step' in line:
             self.dt = float(self.file_contents[index+1].strip())
         elif 'number_of_steps' in line:
-            self.cutoff = int(self.file_contents[index+1].strip())
+            self.n_time_steps = int(self.file_contents[index+1].strip())
         elif 'simulated_ensemble' in line:
             self.ensemble = self.file_contents[index+1].strip()
         elif 'angle_function' in line:
