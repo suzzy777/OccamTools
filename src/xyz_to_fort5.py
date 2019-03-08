@@ -47,9 +47,8 @@ def _parse_comment_line(line):
         try:
             b = [float(b) for b in box]
             return b
-        except ValueError as e:
-            print("--->", e)
-            return box
+        except ValueError:
+            raise
     else:
         return None
 
@@ -88,11 +87,12 @@ def xyz_to_fort5(file_name, wrap, box, new_file_name='fort.5'):
         _write_box(out_file, box)
         _write_n_particles(out_file, n_molecules)
 
-        for atom_ind in range(1, n_molecules):
+        for atom_ind in range(1, n_molecules+1):
             line = in_file.readline().split()
             label = line[0]
             pos = [float(l) for l in line[1:]]
             for i, x in enumerate(pos):
-                pos[i] = _ensure_inside_box(x, box, wrap)
+                pos[i] = _ensure_inside_box(x, box[i], wrap)
             x, y, z = pos
             _write_molecule(out_file, atom_ind, x, y, z, label=label)
+    return new_file_name
