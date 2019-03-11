@@ -15,6 +15,5 @@ setup(
                       'numba>=0.42.1',
                       'matplotlib>=3.0.2',
                       'flake8>=3.7.7',
-                      'coverage>=4.5.2',
-                      'codecov>=2.0.15'],
+                      'coverage>=4.5.2'],
 )

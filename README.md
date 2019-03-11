@@ -32,4 +32,3 @@ Exit the pip virtual environment by
 ```bash
 > deactivate
 ```
-

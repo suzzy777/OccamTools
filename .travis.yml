@@ -1,11 +1,17 @@
 sudo: false
 dist: xenial
 language: python
+env:
+  - CODACY_PROJECT_TOKEN=f0d5e9be6e0a4104956259d20b686976
 python:
   - 3.7.1
 install:
+  - pip3 install codecov
+  - pip3 install codacy-coverage
   - pip3 install -e .
 script:
   - pytest -v --cov=occamtools
 after_success:
   - codecov -t a7891cfa-6e25-46f4-a46b-abedaa6a7dfe
+  - coverage xml
+  - python-codacy-coverage -r coverage.xml
