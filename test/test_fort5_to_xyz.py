@@ -1,12 +1,9 @@
 import os
-import sys
 import pytest
 import numpy as np
-from test_generate_fort5 import _check_remove_file
-
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
-from generate_fort5 import generate_uniform_random  # noqa: E402
-from fort5_to_xyz import fort5_to_xyz, _convert_file_name  # noqa: E402
+from occamtools.generate_fort5 import generate_uniform_random
+from occamtools.fort5_to_xyz import fort5_to_xyz, _convert_file_name
+from test.test_generate_fort5 import _check_remove_file
 
 
 def _remove_files(*files):

@@ -1,13 +1,10 @@
 import os
-import sys
 import pytest
 import numpy as np
-from test_fort5_to_xyz import _remove_files
-from test_generate_fort5 import _check_remove_file
-
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
-from xyz_to_fort5 import (xyz_to_fort5, _check_box,
-                          _parse_comment_line)  # noqa: E402
+from test.test_fort5_to_xyz import _remove_files
+from test.test_generate_fort5 import _check_remove_file
+from occamtools.xyz_to_fort5 import (xyz_to_fort5, _check_box,
+                                     _parse_comment_line)
 
 
 def _generate_minimal_xyz():

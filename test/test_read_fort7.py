@@ -1,9 +1,6 @@
 import os
-import sys
 import pytest
-
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
-from read_fort7 import Fort7  # noqa: E402
+from occamtools.read_fort7 import Fort7
 
 
 def _load_example_fort7():

@@ -1,7 +1,8 @@
 
 import numpy as np
-from generate_fort5 import _write_box, _write_n_particles, _write_molecule
-from fort5_to_xyz import _ensure_inside_box
+from occamtools.generate_fort5 import (_write_box, _write_n_particles,
+                                       _write_molecule)
+from occamtools.fort5_to_xyz import _ensure_inside_box
 
 
 def _parse_comment_line(line):

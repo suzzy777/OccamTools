@@ -1,9 +1,6 @@
 import os
-import sys
 import pytest
-
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
-from read_fort1 import _parse_bool, Fort1  # noqa: E402
+from occamtools.read_fort1 import _parse_bool, Fort1
 
 
 def test_parse_bool():

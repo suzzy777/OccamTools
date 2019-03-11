@@ -1,10 +1,1 @@
-pytest>=4.3.0
-pytest-cov>=2.6.1
-scikit-learn>=0.20.2
-scipy>=1.2.1
-numpy>=1.16.1
-numba>=0.42.1
-matplotlib>=3.0.2
-flake8>=3.7.7
-coverage>=4.5.2
-codecov>=2.0.15
+.

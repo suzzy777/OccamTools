@@ -5,8 +5,31 @@
 ## OccamTools
 Analysis and synthesis tools for OCCAM molecular dynamics/hybrid particle-field simulations.
 
-### Build
-Install dependencies by
+### Development build
+Clone the repository
 ```bash
-> pip3 install -r requirements.txt
+> git clone git@github.com:mortele/OccamTools.git
+> cd OccamTools
 ```
+create a virtualenv named `ot` 
+```bash
+> pip3 install virtualenv
+> virtualenv ot
+> source ot/bin/activate 
+```
+install the `occamtools` package in `--editable` (or `-e` mode) by
+```bash
+> pip3 install -e .
+```
+Functions and classes in scripts in the `occamtools` and `test` directories may now be imported by simply 
+```python
+from occamtools.filename import class_name
+from occamtools.filename import function_name
+from test.filename import test_function_name
+```
+#### Exiting `virtualenv`
+Exit the pip virtual environment by
+```bash
+> deactivate
+```
+
