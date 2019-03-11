@@ -6,6 +6,6 @@ python:
 install:
   - pip3 install -e .
 script:
-  - pytest -v --cov=./
+  - pytest -v --cov=occamtools
 after_success:
   - codecov -t a7891cfa-6e25-46f4-a46b-abedaa6a7dfe
