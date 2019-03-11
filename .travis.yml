@@ -10,7 +10,7 @@ install:
   - pip3 install codacy-coverage
   - pip3 install -e .
 script:
-  - pytest -v --cov=occamtools
+  - pytest -v --cov=./
 after_success:
   - codecov -t a7891cfa-6e25-46f4-a46b-abedaa6a7dfe
   - coverage xml
