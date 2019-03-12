@@ -4,7 +4,7 @@ from occamtools.read_fort7 import Fort7
 
 
 def _load_example_fort7():
-    file_name = os.path.join(os.path.dirname(__file__), '..', 'data',
+    file_name = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
                              'example_fort.7')
     fort7 = Fort7(file_name)
     fort7.read_file()
@@ -12,7 +12,7 @@ def _load_example_fort7():
 
 
 def test_read_fort7_file():
-    new_file_name = os.path.join(os.path.dirname(__file__), '..', 'data',
+    new_file_name = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
                                  'example_fort_new.7')
 
     fort7, file_name = _load_example_fort7()

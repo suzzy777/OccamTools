@@ -20,9 +20,9 @@ def test_parse_bool():
 
 
 def test_read_fort1_file():
-    file_name = os.path.join(os.path.dirname(__file__), '..', 'data',
+    file_name = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
                              'example_fort.1')
-    file_name_2 = os.path.join(os.path.dirname(__file__), '..', 'data',
+    file_name_2 = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
                                'example_2_fort.1')
     fort1 = Fort1(file_name)
     fort1.read_file()
@@ -60,7 +60,7 @@ def test_read_fort1_invalid():
 
 
 def test_read_fort1_file_contents():
-    file_name = os.path.join(os.path.dirname(__file__), '..', 'data',
+    file_name = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
                              'example_fort.1')
     fort1 = Fort1(file_name)
     fort1.read_file()

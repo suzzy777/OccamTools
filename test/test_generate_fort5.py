@@ -15,7 +15,7 @@ def _check_remove_file(file_name):
 def test_generate_random_uniform_path():
     # Test that path names given result in a file called 'fort.5' created in
     # the given path.
-    path = os.path.join(os.path.dirname(__file__), '..')
+    path = os.path.join(os.path.dirname(__file__), os.pardir)
     path_file = os.path.join(os.path.join(path, 'fort.5'))
     _check_remove_file(path_file)
 
