@@ -8,6 +8,8 @@ def _are_floats(*args):
             _ = float(f)
     except TypeError:
         are_floats = False
+    except ValueError:
+        are_floats = False
     return are_floats
 
 
@@ -23,23 +25,22 @@ class Xyz:
         self.z = np.zeros(shape=(self.n_time_steps, self.n_particles))
 
     def _parse_comment_first(self, line):
-        sline = line.split()
+        line = line.split()
         recognized = True
         self.box = [None, None, None]
-        if len(sline) == 4:
-            if not _are_floats(*tuple(sline)):
+        if len(line) == 4:
+            if not _are_floats(*tuple(line)):
                 recognized = False
             else:
-                self.time[0] = float(sline[0])
-                self.box = [float(sline[1]), float(sline[2]), float(sline[3])]
-        elif len(sline) == 3:
-            if not _are_floats(*tuple(sline)):
-                recognized = False
-            else:
-                self.box = [float(sline[0]), float(sline[1]), float(sline[2])]
+                self.time[0] = float(line[0])
+                self.box = [float(line[1]), float(line[2]), float(line[3])]
+        elif len(line) == 3:
+            recognized = False
+            if _are_floats(*tuple(line)):
+                self.box = [float(line[0]), float(line[1]), float(line[2])]
         else:
             recognized = False
-        return recognized
+        self.comment_format_known = recognized
 
     def _parse_types(self, in_file):
         in_file.seek(0)  # Reset position to the start of the file
@@ -67,7 +68,7 @@ class Xyz:
             self.n_time_steps = self.num_lines // self.n_particles
             self._allocate_arrays()
             line = in_file.readline()
-            self.comment_format_known = self._parse_comment_first(line)
+            self._parse_comment_first(line)
             self._parse_types(in_file)
 
             in_file.seek(0)

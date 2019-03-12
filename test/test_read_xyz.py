@@ -1,7 +1,7 @@
 import os
 import pytest
 import numpy as np
-from occamtools.read_xyz import Xyz
+from occamtools.read_xyz import Xyz, _are_floats
 
 file_name = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
                          'example_fort.8')
@@ -65,3 +65,50 @@ def test_read_xyz_time_array():
     assert xyz.time[1] == pytest.approx(0.03, abs=1e-9)
     assert xyz.time[2] == pytest.approx(0.3, abs=1e-9)
     assert xyz.time[11] == pytest.approx(3.0, abs=1e-9)
+
+
+def test_read_xyz_parse_comment_line():
+    xyz = _read_default_file_name()
+    xyz._parse_comment_first('1.7 2.5 5.0 5.0')
+    assert xyz.comment_format_known
+    assert xyz.time[0] == pytest.approx(1.7, abs=1e-15)
+    assert np.allclose(xyz.box, [2.5, 5.0, 5.0])
+
+    del xyz
+    xyz = _read_default_file_name()
+    time_0 = 985.2519859185
+    xyz.time[0] = time_0
+    xyz._parse_comment_first('6.7 8.1 9.9')
+    print(len('6.7 8.1 9.9'.split()))
+    assert xyz.comment_format_known is False
+    assert xyz.time[0] == time_0
+    assert np.allclose(xyz.box, [6.7, 8.1, 9.9])
+
+    del xyz
+    xyz = _read_default_file_name()
+    xyz._parse_comment_first('abc')
+    assert xyz.comment_format_known is False
+    assert all([b is None for b in xyz.box])
+
+    del xyz
+    xyz = _read_default_file_name()
+    xyz._parse_comment_first('1.0 2.0 A')
+    assert xyz.comment_format_known is False
+    assert all([b is None for b in xyz.box])
+
+    del xyz
+    xyz = _read_default_file_name()
+    xyz._parse_comment_first('1.0 2.0 3.0 B')
+    assert xyz.comment_format_known is False
+    assert all([b is None for b in xyz.box])
+
+
+def test_are_floats():
+    assert _are_floats('6.5', '7.1', '9', '0', '-521.5')
+    assert _are_floats(6, 1, -925, 2598.125)
+    assert _are_floats('   852.125   ', '   -0.1242   ', '    3    ')
+    assert _are_floats('99', '2.1', '-75', '-9285.15', 23, 5.1245, -9, -0.12)
+
+    assert not _are_floats(1, 5.6, '52.1', '8', 'askgj')
+    assert not _are_floats(2.1, 3.8, None)
+    assert not _are_floats('box:', '125.0', '25.0', '25.0')
