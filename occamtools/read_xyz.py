@@ -19,10 +19,10 @@ class Xyz:
 
     def _allocate_arrays(self):
         self.type = np.zeros(self.n_particles)
-        self.time = np.zeros(self.n_time_steps)
-        self.x = np.zeros(shape=(self.n_time_steps, self.n_particles))
-        self.y = np.zeros(shape=(self.n_time_steps, self.n_particles))
-        self.z = np.zeros(shape=(self.n_time_steps, self.n_particles))
+        self.time = np.zeros(self.n_time_steps_)
+        self.x = np.zeros(shape=(self.n_time_steps_, self.n_particles))
+        self.y = np.zeros(shape=(self.n_time_steps_, self.n_particles))
+        self.z = np.zeros(shape=(self.n_time_steps_, self.n_particles))
 
     def _parse_comment_first(self, line):
         line = line.split()
@@ -65,14 +65,14 @@ class Xyz:
 
         with open(self.file_name, 'r') as in_file:
             self.n_particles = int(in_file.readline())
-            self.n_time_steps = self.num_lines // self.n_particles
+            self.n_time_steps_ = self.num_lines // self.n_particles
             self._allocate_arrays()
             line = in_file.readline()
             self._parse_comment_first(line)
             self._parse_types(in_file)
 
             in_file.seek(0)
-            for time_step in range(self.n_time_steps):
+            for time_step in range(self.n_time_steps_):
                 for _ in range(2):
                     line = in_file.readline()
                 if self.comment_format_known:
