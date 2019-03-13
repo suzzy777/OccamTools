@@ -12,7 +12,6 @@ def _check_internal_consistency(a, b):
             warn = False
             a_val = a_vars[k]
             b_val = b_vars[k]
-            print(a_val, b_val)
             if _are_floats(a_val, b_val):  # These attributes are numbers
                 if not np.allclose(a_val, b_val):
                     warn = True

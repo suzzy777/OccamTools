@@ -31,7 +31,6 @@ def test_read_fort7_file():
 
 def test_read_fort7_array_length():
     fort7, _ = _load_example_fort7()
-    print(fort7.step)
     assert fort7.step.shape[0] == 11
     assert fort7.step[-1] == 100
 

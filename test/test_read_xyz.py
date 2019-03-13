@@ -79,7 +79,6 @@ def test_read_xyz_parse_comment_line():
     time_0 = 985.2519859185
     xyz.time[0] = time_0
     xyz._parse_comment_first('6.7 8.1 9.9')
-    print(len('6.7 8.1 9.9'.split()))
     assert xyz.comment_format_known is False
     assert xyz.time[0] == time_0
     assert np.allclose(xyz.box, [6.7, 8.1, 9.9])
