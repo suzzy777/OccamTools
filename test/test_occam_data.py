@@ -161,7 +161,7 @@ def test_occam_data_save_load():
     all_attributes = [key for key in occam_data.__dict__]
     attributes = []
     for key in all_attributes:
-        if type(occam_data.__dict__[key]) == np.ndarray:
+        if isinstance(occam_data.__dict__[key], np.ndarray):
             attributes.append(key)
     occam_data.save()
 
