@@ -9,7 +9,7 @@ file_name = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
 
 def _read_default_file_name():
     xyz = Xyz(file_name)
-    xyz.read_file()
+    xyz.read_file(silent=True)
     return xyz
 
 
@@ -17,21 +17,21 @@ def test_read_xyz_file():
     other_file = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
                               'example_fort.5')
     xyz = Xyz(file_name)
-    xyz.read_file()
+    xyz.read_file(silent=True)
     assert xyz.x.shape == (12, 25)
 
     del xyz
     xyz = Xyz(other_file)
     caught = False
     try:
-        xyz.read_file()
+        xyz.read_file(silent=True)
     except ValueError:
         caught = True
     assert caught
 
     del xyz
     xyz = Xyz(other_file)
-    xyz.read_file(file_name)
+    xyz.read_file(file_name, silent=True)
     assert xyz.y.shape == (12, 25)
 
 

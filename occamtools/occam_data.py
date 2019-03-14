@@ -67,7 +67,7 @@ def _open_fort_files(fort1, fort7, xyz, which=None):
         x = Xyz(x)
 
     for f in (f1, f7, x):
-        f.read_file()
+        f.read_file(silent=True)
     return f1, f7, x
 
 
@@ -81,7 +81,6 @@ def _check_npy_dump_exists(file_name):
         raise FileNotFoundError('Could not find file, ' + file_name)
     exists = False
     if os.path.exists(class_dir):
-        print(os.path.join(class_dir, 'x.npy'))
         if os.path.exists(os.path.join(class_dir, 'x.npy')):
             exists = True
     return exists, class_dir

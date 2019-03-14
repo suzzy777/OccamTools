@@ -7,7 +7,7 @@ def _load_example_fort7():
     file_name = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
                              'example_fort.7')
     fort7 = Fort7(file_name)
-    fort7.read_file()
+    fort7.read_file(silent=True)
     return fort7, file_name
 
 
@@ -24,7 +24,7 @@ def test_read_fort7_file():
                 line = 'title: new_title\n'
             out_file.write(line)
     fort7 = Fort7(file_name)
-    fort7.read_file(new_file_name)
+    fort7.read_file(new_file_name, silent=True)
     assert fort7.title == 'new_title'
     os.remove(new_file_name)
 

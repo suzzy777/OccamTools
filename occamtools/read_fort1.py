@@ -84,13 +84,18 @@ class Fort1:
         else:
             raise ValueError(f"fort.1 line not recognized, {line}")
 
-    def read_file(self, file_name=None):
+    def read_file(self, file_name=None, silent=False):
         if file_name is not None:
             self.file_name = file_name
             with open(self.file_name, 'r') as in_file:
                 self.file_contents = in_file.readlines()
-        print('Loading fort.1 data from file:\n' + self.file_name)
+        if not silent:
+            print('Loading fort.1 data from file:\n' + self.file_name)
 
-        for i, line in enumerate(tqdm(self.file_contents)):
+        if silent:
+            enumerate_obj = enumerate(self.file_contents)
+        else:
+            enumerate_obj = enumerate(tqdm(self.file_contents))
+        for i, line in enumerate_obj:
             if i % 2 == 0:
                 self._parse_line(line, i)

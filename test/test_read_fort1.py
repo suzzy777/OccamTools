@@ -25,7 +25,7 @@ def test_read_fort1_file():
     file_name_2 = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
                                'example_2_fort.1')
     fort1 = Fort1(file_name)
-    fort1.read_file()
+    fort1.read_file(silent=True)
 
     with open(file_name, 'r') as in_file:
         for _ in range(2):
@@ -33,7 +33,7 @@ def test_read_fort1_file():
         assert line == fort1.title
         assert line == 'example_fort.1'
 
-    fort1.read_file(file_name_2)
+    fort1.read_file(file_name_2, silent=True)
     with open(file_name_2, 'r') as in_file:
         for _ in range(2):
             line = in_file.readline().strip()
@@ -52,7 +52,7 @@ def test_read_fort1_invalid():
     caught = False
     try:
         fort1 = Fort1(file_name)
-        fort1.read_file()
+        fort1.read_file(silent=True)
     except ValueError:
         caught = True
     assert caught
@@ -63,7 +63,7 @@ def test_read_fort1_file_contents():
     file_name = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
                              'example_fort.1')
     fort1 = Fort1(file_name)
-    fort1.read_file()
+    fort1.read_file(silent=True)
     assert fort1.n_particles == 2500
     assert fort1.dt == pytest.approx(0.03, abs=1e-15)
     assert fort1.adaptive_region_start == pytest.approx(50.0, abs=1e-15)

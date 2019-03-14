@@ -27,20 +27,25 @@ class Fort7:
         self.pressure_pf_0 = self.pressure_pf_0[:i]
         self.pressure_pf_1 = self.pressure_pf_1[:i]
 
-    def _parse_cycle(self, in_file, lines_parsed):
+    def _parse_cycle(self, in_file, lines_parsed, silent):
         self.current_index = 0
-        pbar = tqdm(total=self.num_lines - lines_parsed)
+        if not silent:
+            pbar = tqdm(total=self.num_lines - lines_parsed)
+        else:
+            pbar = None
         while self._parse_step(in_file, pbar):
             self.current_index += 1
-        pbar.update(self.num_lines - lines_parsed - pbar.n)
-        pbar.close()
+        if not silent:
+            pbar.update(self.num_lines - lines_parsed - pbar.n)
+            pbar.close()
         self._prune_arrays()
         self._parse_final_avg(in_file)
 
     def _parse_step(self, in_file, pbar):
         i = self.current_index
         while True:
-            pbar.update(1)
+            if pbar is not None:
+                pbar.update(1)
             line = in_file.readline().strip().split()
             if line:  # Make sure the line isnt empty, ''
                 if 'nonbonded virial' in ' '.join(line):
@@ -68,10 +73,11 @@ class Fort7:
     def _parse_final_avg(self, in_file):
         pass
 
-    def read_file(self, file_name=None):
+    def read_file(self, file_name=None, silent=False):
         if file_name is not None:
             self.file_name = file_name
-        print('Loading fort.7 data from file:\n' + self.file_name)
+        if not silent:
+            print('Loading fort.7 data from file:\n' + self.file_name)
 
         # Go through the file initally and just count the number of lines.
         with open(self.file_name, 'r') as in_file:
@@ -101,4 +107,4 @@ class Fort7:
                         break
 
             self._allocate_arrays()
-            self._parse_cycle(in_file, lines_parsed)
+            self._parse_cycle(in_file, lines_parsed, silent)

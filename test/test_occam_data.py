@@ -20,13 +20,13 @@ ignore = ['file_name', 'n_time_steps_', 'file_contents',
           'comment_format_known', 'num_lines']
 
 
-def _load_default_forts():
+def _load_default_forts(silent=True):
     fort1 = Fort1(file_name_fort_1)
-    fort1.read_file()
+    fort1.read_file(silent=silent)
     fort7 = Fort7(file_name_fort_7)
-    fort7.read_file()
+    fort7.read_file(silent=silent)
     xyz = Xyz(file_name_fort_xyz)
-    xyz.read_file()
+    xyz.read_file(silent=silent)
     return fort1, fort7, xyz
 
 
@@ -188,3 +188,13 @@ def test_occam_data_save_load():
     assert caught
 
     shutil.rmtree(class_dir)
+
+
+def test_occam_data_progress_bars():
+    fort1, fort7, fort8 = _load_default_forts()
+    occam_data_silent = OccamData(fort1, fort7, fort8)
+    fort1, fort7, fort8 = _load_default_forts(silent=False)
+    occam_data_verbose = OccamData(fort1, fort7, fort8)
+    for key in occam_data_silent.__dict__:
+        assert _check_equal(occam_data_silent.__dict__[key],
+                            occam_data_verbose.__dict__[key])

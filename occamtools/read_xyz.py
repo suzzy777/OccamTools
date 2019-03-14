@@ -59,10 +59,11 @@ class Xyz:
                 ind += 1
             self.type[i] = self.type_dict[t]
 
-    def read_file(self, file_name=None, save=True):
+    def read_file(self, file_name=None, save=True, silent=False):
         if file_name is not None:
             self.file_name = file_name
-        print('Loading fort.8 data from file:\n' + self.file_name)
+        if not silent:
+            print('Loading fort.8 data from file:\n' + self.file_name)
 
         # Go through the file initally and just count the number of lines.
         with open(self.file_name, 'r') as in_file:
@@ -77,7 +78,12 @@ class Xyz:
             self._parse_types(in_file)
 
             in_file.seek(0)
-            for time_step in tqdm(range(self.n_time_steps_)):
+            if silent:
+                range_obj = range(self.n_time_steps_)
+            else:
+                range_obj = tqdm(range(self.n_time_steps_))
+
+            for time_step in range_obj:
                 for _ in range(2):
                     line = in_file.readline()
                 if self.comment_format_known:
