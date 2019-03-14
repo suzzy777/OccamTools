@@ -106,30 +106,23 @@ def test_occam_data_wrong_input():
 
 
 def test_occam_data_not_equal():
-    fort1, fort7, xyz = _load_default_forts()
-    fort1.n_particles += 1
-    occam_data = OccamData(fort1, fort7, xyz)
-    assert occam_data.consistent is False
+    for i in range(2):
+        fort1, fort7, xyz = _load_default_forts()
+        if i == 0:
+            fort1.n_particles += 1
+        else:
+            fort1.title = 'changed'
 
-    warnings.filterwarnings('error')
-    caught = False
-    try:
-        _ = OccamData(fort1, fort7, xyz)
-    except Warning:
-        caught = True
-    assert caught
+        warnings.filterwarnings('ignore')
+        fort1.n_particles += 1
+        occam_data = OccamData(fort1, fort7, xyz)
+        assert occam_data.consistent is False
 
-    warnings.filterwarnings('always')
-    fort1.n_particles -= 1
-    fort1.title = 'changed'
-    occam_data = OccamData(fort1, fort7, xyz)
-    assert occam_data.consistent is False
-
-    warnings.filterwarnings('error')
-    caught = False
-    try:
-        _ = OccamData(fort1, fort7, xyz)
-    except Warning:
-        caught = True
-    assert caught
+        warnings.filterwarnings('error')
+        caught = False
+        try:
+            _ = OccamData(fort1, fort7, xyz)
+        except Warning:
+            caught = True
+        assert caught
     warnings.filterwarnings('always')
