@@ -2,6 +2,7 @@ import os
 import pytest
 import numpy as np
 import warnings
+import shutil
 from occamtools.read_fort1 import Fort1
 from occamtools.read_fort7 import Fort7
 from occamtools.read_xyz import Xyz, _are_floats
@@ -29,9 +30,9 @@ def _load_default_forts():
     return fort1, fort7, xyz
 
 
-def _create_default_occam_data_object():
+def _create_default_occam_data_object(load_from_npy=False):
     fort1, fort7, xyz = _load_default_forts()
-    occam_data = OccamData(fort1, fort7, xyz)
+    occam_data = OccamData(fort1, fort7, xyz, load_from_npy=load_from_npy)
     return occam_data, fort1, fort7, xyz
 
 
@@ -130,20 +131,60 @@ def test_occam_data_not_equal():
 
 def test_occam_data_single_input():
     fort1, fort7, xyz = _load_default_forts()
-    occam_data = OccamData(fort1.file_name)
+    occam_data = OccamData(fort1.file_name, load_from_npy=False)
     _assert_all_attributes_present_and_equal(occam_data, fort1, fort7, xyz)
-    occam_data = OccamData(fort7.file_name)
+    occam_data = OccamData(fort7.file_name, load_from_npy=False)
     _assert_all_attributes_present_and_equal(occam_data, fort1, fort7, xyz)
-    occam_data = OccamData(xyz.file_name)
+    occam_data = OccamData(xyz.file_name, load_from_npy=False)
+    _assert_all_attributes_present_and_equal(occam_data, fort1, fort7, xyz)
+    occam_data = OccamData(os.path.dirname(fort1.file_name),
+                           load_from_npy=False)
     _assert_all_attributes_present_and_equal(occam_data, fort1, fort7, xyz)
 
     inputs = ['this_is_not_a_file', None, 1, 8.29898, fort1, fort7, xyz]
     for inp in inputs:
         caught = False
         try:
-            _ = OccamData(inp)
+            _ = OccamData(inp, load_from_npy=False)
         except TypeError:
             caught = True
         except FileNotFoundError:
             caught = True
         assert caught
+
+
+def test_occam_data_save_load():
+    class_dir = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
+                             'class_data')
+    shutil.rmtree(class_dir, ignore_errors=True)
+    occam_data, fort1, fort7, xyz = _create_default_occam_data_object()
+    all_attributes = [key for key in occam_data.__dict__]
+    attributes = []
+    for key in all_attributes:
+        if type(occam_data.__dict__[key]) == np.ndarray:
+            attributes.append(key)
+    occam_data.save()
+
+    for array in attributes:
+        expected_file_name = array + '.npy'
+        assert os.path.exists(os.path.join(class_dir, expected_file_name))
+    for key in all_attributes:
+        assert key in occam_data.__dict__
+
+    occam_data_npy_loaded = OccamData(os.path.join(class_dir, os.pardir))
+    for key in all_attributes:
+        assert key in occam_data_npy_loaded.__dict__
+
+    assert not occam_data_npy_loaded.save(overwrite=False)
+    occam_data_npy_loaded_file = OccamData(os.path.join(class_dir, os.pardir,
+                                                        'fort.1'))
+    _assert_all_attributes_present_and_equal(occam_data_npy_loaded_file,
+                                             fort1, fort7, xyz)
+    caught = False
+    try:
+        _ = OccamData('this_is_not_a_file')
+    except FileNotFoundError:
+        caught = True
+    assert caught
+
+    shutil.rmtree(class_dir)

@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import warnings
+import json
 from occamtools.read_xyz import _are_floats, Xyz
 from occamtools.read_fort1 import Fort1
 from occamtools.read_fort7 import Fort7
@@ -70,6 +71,22 @@ def _open_fort_files(fort1, fort7, xyz, which=None):
     return f1, f7, x
 
 
+def _check_npy_dump_exists(file_name):
+    class_dir = None
+    if os.path.isdir(file_name):
+        class_dir = os.path.join(file_name, 'class_data')
+    elif os.path.exists(file_name):
+        class_dir = os.path.join(os.path.dirname(file_name), 'class_data')
+    else:
+        raise FileNotFoundError('Could not find file, ' + file_name)
+    exists = False
+    if os.path.exists(class_dir):
+        print(os.path.join(class_dir, 'x.npy'))
+        if os.path.exists(os.path.join(class_dir, 'x.npy')):
+            exists = True
+    return exists, class_dir
+
+
 def _check_constructor_input(*args):
     if len(args) == 3:
         fort1, fort7, xyz = args
@@ -110,17 +127,98 @@ def _check_constructor_input(*args):
             x = args[0]
             f1 = os.path.join(os.path.dirname(x), 'fort.1')
             f7 = os.path.join(os.path.dirname(x), 'fort.7')
+        elif os.path.isdir(args[0]):
+            f1 = os.path.join(args[0], 'fort.1')
+            f7 = os.path.join(args[0], 'fort.7')
+            x = os.path.join(args[0], 'fort.8')
         return _open_fort_files(f1, f7, x)
 
 
 class OccamData:
-    def __init__(self, *args):
-        fort1, fort7, xyz = _check_constructor_input(*args)
-        self.consistent = _check_internal_consistency_all(fort1, fort7, xyz)
-        ignore = ['file_name', 'n_time_steps_', 'file_contents',
-                  'comment_format_known']
-        for f in (fort1, fort7, xyz):
-            for key in f.__dict__:
-                if key not in ignore:
-                    setattr(self, key, f.__dict__[key])
-        self.fort1_file_contents = fort1.file_contents
+    save_dir = 'class_data'
+
+    def __init__(self, *args, load_from_npy=True):
+        npy_loaded = False
+        if len(args) == 1 and load_from_npy:
+            check, class_path = _check_npy_dump_exists(args[0])
+            if check:
+                self.load(class_path)
+                npy_loaded = True
+        if not npy_loaded:
+            fort1, fort7, xyz = _check_constructor_input(*args)
+            self.consistent = _check_internal_consistency_all(fort1, fort7,
+                                                              xyz)
+            ignore = ['file_name', 'n_time_steps_', 'file_contents',
+                      'comment_format_known']
+            for f in (fort1, fort7, xyz):
+                for key in f.__dict__:
+                    if key not in ignore:
+                        setattr(self, key, f.__dict__[key])
+            # self.fort1_file_contents = fort1.file_contents
+            self.fort1_file_name = fort1.file_name
+            self.fort7_file_name = fort7.file_name
+            self.xyz_file_name = xyz.file_name
+
+    def save(self, overwrite=False):
+        self.save_path = os.path.join(os.path.dirname(self.fort1_file_name),
+                                      self.save_dir)
+        if (os.path.exists(self.save_path)):
+            if not overwrite:
+                return False
+        else:
+            os.mkdir(self.save_path)
+        self._save_arrays()
+        self._delete_array_attributes()
+        self._save_class()
+        self._load_arrays(self.save_path)
+        return True
+
+    def load(self, class_path):
+        self._load_arrays(class_path)
+        self._load_class(class_path)
+
+    def _load_arrays(self, class_path):
+        files = os.listdir(class_path)
+        non_npy_files = []
+        for f in files:
+            if f.split('.')[-1] != 'npy':
+                non_npy_files.append(f)
+        for f in non_npy_files:
+            files.remove(f)
+        for npy_file in files:
+            attribute_name = os.path.basename(npy_file).split('.')[0]
+            setattr(self, attribute_name, np.load(os.path.join(class_path,
+                                                               npy_file)))
+
+    def _save_arrays(self):
+        self.save_path = os.path.join(os.path.dirname(self.fort1_file_name),
+                                      self.save_dir)
+        attributes_to_delete = []
+        for key in self.__dict__:
+            if isinstance(self.__dict__[key], np.ndarray):
+                npy_file_name = key + '.npy'
+                np.save(os.path.join(self.save_path, npy_file_name),
+                        self.__dict__[key])
+                attributes_to_delete.append(key)
+
+    def _delete_array_attributes(self):
+        attributes_to_delete = []
+        for key in self.__dict__:
+            if isinstance(self.__dict__[key], np.ndarray):
+                attributes_to_delete.append(key)
+        for attribute in attributes_to_delete:
+            delattr(self, attribute)
+
+    def _save_class(self):
+        self.save_path = os.path.join(os.path.dirname(self.fort1_file_name),
+                                      self.save_dir)
+        json_file = os.path.join(self.save_path, 'class.json')
+        with open(json_file, 'w') as out_file:
+            json.dump(self.__dict__, out_file)
+
+    def _load_class(self, class_path):
+        json_file = os.path.join(class_path, 'class.json')
+        with open(json_file, 'r') as in_file:
+            class_attributes = json.load(in_file)
+            for key in class_attributes:
+                setattr(self, key, class_attributes[key])

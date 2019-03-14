@@ -40,6 +40,8 @@ class Xyz:
                 self.box = [float(line[0]), float(line[1]), float(line[2])]
         else:
             recognized = False
+        if self.box[0] is not None:
+            self.box = np.array(self.box)
         self.comment_format_known = recognized
 
     def _parse_types(self, in_file):

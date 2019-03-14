@@ -79,7 +79,7 @@ class Fort7:
                         self.cutoff = float(line[-1].strip())
                     elif 'box' in line[0]:
                         line = in_file.readline().split()
-                        self.box = [float(b) for b in line]
+                        self.box = np.array([float(b) for b in line])
                     elif 'number of time steps' in ' '.join(line):
                         self.n_time_steps = int(line[-1])
                     elif 'time step length' in ' '.join(line):
