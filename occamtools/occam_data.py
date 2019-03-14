@@ -28,8 +28,8 @@ def _check_internal_consistency(a, b):
                             + ': ' + str(a_val) + '\n\n'
                             + '->' + str(class_b) + ' from file ' + b.file_name
                             + ': ' + str(b_val))
-                warnings.warn(warn_str)
                 consistent = False
+                warnings.warn(warn_str)
     return consistent
 
 
