@@ -126,3 +126,24 @@ def test_occam_data_not_equal():
             caught = True
         assert caught
     warnings.filterwarnings('always')
+
+
+def test_occam_data_single_input():
+    fort1, fort7, xyz = _load_default_forts()
+    occam_data = OccamData(fort1.file_name)
+    _assert_all_attributes_present_and_equal(occam_data, fort1, fort7, xyz)
+    occam_data = OccamData(fort7.file_name)
+    _assert_all_attributes_present_and_equal(occam_data, fort1, fort7, xyz)
+    occam_data = OccamData(xyz.file_name)
+    _assert_all_attributes_present_and_equal(occam_data, fort1, fort7, xyz)
+
+    inputs = ['this_is_not_a_file', None, 1, 8.29898, fort1, fort7, xyz]
+    for inp in inputs:
+        caught = False
+        try:
+            _ = OccamData(inp)
+        except TypeError:
+            caught = True
+        except FileNotFoundError:
+            caught = True
+        assert caught

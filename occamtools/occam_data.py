@@ -70,27 +70,52 @@ def _open_fort_files(fort1, fort7, xyz, which=None):
     return f1, f7, x
 
 
-def _check_constructor_input(fort1, fort7, xyz):
-    if (isinstance(fort1, Fort1) and isinstance(fort7, Fort7)
-            and isinstance(xyz, Xyz)):
-        return fort1, fort7, xyz
-    elif (isinstance(fort1, str) and isinstance(fort7, str)
-            and isinstance(xyz, str)):
-        return _open_fort_files(fort1, fort7, xyz)
-    elif isinstance(fort1, str):
-        return _open_fort_files(fort1, fort7, xyz, which=0)
-    elif isinstance(fort7, str):
-        return _open_fort_files(fort1, fort7, xyz, which=1)
-    elif isinstance(xyz, str):
-        return _open_fort_files(fort1, fort7, xyz, which=2)
-    else:
-        raise ValueError('OccamData constructor input not recognized as Fort1/'
-                         'Fort7/Xzy objects or (one or more) file paths.')
+def _check_constructor_input(*args):
+    if len(args) == 3:
+        fort1, fort7, xyz = args
+        if (isinstance(fort1, Fort1) and isinstance(fort7, Fort7)
+                and isinstance(xyz, Xyz)):
+            return fort1, fort7, xyz
+        elif (isinstance(fort1, str) and isinstance(fort7, str)
+                and isinstance(xyz, str)):
+            return _open_fort_files(fort1, fort7, xyz)
+        elif isinstance(fort1, str):
+            return _open_fort_files(fort1, fort7, xyz, which=0)
+        elif isinstance(fort7, str):
+            return _open_fort_files(fort1, fort7, xyz, which=1)
+        elif isinstance(xyz, str):
+            return _open_fort_files(fort1, fort7, xyz, which=2)
+        else:
+            raise ValueError('OccamData constructor input not recognized as '
+                             'Fort1/Fort7/Xzy objects or (one or more) file '
+                             'paths.')
+    elif len(args) == 1:
+        if not isinstance(args[0], str):
+            raise TypeError('OccamData constructor called with a single input '
+                            'must be a file path, not ' + repr(args[0]))
+        if isinstance(args[0], str) and (not os.path.exists(args[0])):
+            raise FileNotFoundError('File provided in OccamData constructor '
+                                    'not found, ' + args[0])
+
+        extension = os.path.basename(args[0]).split('.')[-1]
+        if extension == str(1):
+            f1 = args[0]
+            f7 = os.path.join(os.path.dirname(f1), 'fort.7')
+            x = os.path.join(os.path.dirname(f1), 'fort.8')
+        elif extension == str(7):
+            f7 = args[0]
+            f1 = os.path.join(os.path.dirname(f7), 'fort.1')
+            x = os.path.join(os.path.dirname(f7), 'fort.8')
+        elif extension == str(8) or extension == 'xyz':
+            x = args[0]
+            f1 = os.path.join(os.path.dirname(x), 'fort.1')
+            f7 = os.path.join(os.path.dirname(x), 'fort.7')
+        return _open_fort_files(f1, f7, x)
 
 
 class OccamData:
-    def __init__(self, fort1, fort7, xyz):
-        fort1, fort7, xyz = _check_constructor_input(fort1, fort7, xyz)
+    def __init__(self, *args):
+        fort1, fort7, xyz = _check_constructor_input(*args)
         self.consistent = _check_internal_consistency_all(fort1, fort7, xyz)
         ignore = ['file_name', 'n_time_steps_', 'file_contents',
                   'comment_format_known']
