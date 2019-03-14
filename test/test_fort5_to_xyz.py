@@ -94,8 +94,6 @@ def test_fort5_to_xyz_wrap():
         for line in contents:
             out_file.write(line)
 
-    with open(changed_file, 'r') as in_file:
-        lines = in_file.readlines()
     xyz_file_name = fort5_to_xyz(changed_file)
 
     with open(xyz_file_name, 'r') as in_file:
