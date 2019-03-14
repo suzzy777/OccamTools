@@ -61,7 +61,8 @@ class Xyz:
             self.file_name = file_name
 
         # Go through the file initally and just count the number of lines.
-        self.num_lines = sum(1 for line in open(self.file_name, 'r'))
+        with open(self.file_name, 'r') as in_file:
+            self.num_lines = sum(1 for line in in_file)
 
         with open(self.file_name, 'r') as in_file:
             self.n_particles = int(in_file.readline())
