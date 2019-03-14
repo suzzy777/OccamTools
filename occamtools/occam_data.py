@@ -8,7 +8,7 @@ from occamtools.read_fort7 import Fort7
 
 
 def _check_internal_consistency(a, b):
-    ignore = ['file_name']
+    ignore = ['file_name', 'num_lines']
     a_vars, b_vars = a.__dict__, b.__dict__
     consistent = True
     for k in a_vars:
@@ -149,12 +149,11 @@ class OccamData:
             self.consistent = _check_internal_consistency_all(fort1, fort7,
                                                               xyz)
             ignore = ['file_name', 'n_time_steps_', 'file_contents',
-                      'comment_format_known']
+                      'comment_format_known', 'num_lines']
             for f in (fort1, fort7, xyz):
                 for key in f.__dict__:
                     if key not in ignore:
                         setattr(self, key, f.__dict__[key])
-            # self.fort1_file_contents = fort1.file_contents
             self.fort1_file_name = fort1.file_name
             self.fort7_file_name = fort7.file_name
             self.xyz_file_name = xyz.file_name

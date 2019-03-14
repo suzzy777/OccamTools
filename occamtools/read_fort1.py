@@ -1,3 +1,5 @@
+from tqdm import tqdm
+
 
 def _parse_bool(string):
     if string.lower() in ('yes', 'y', '1', 't', 'true'):
@@ -87,7 +89,8 @@ class Fort1:
             self.file_name = file_name
             with open(self.file_name, 'r') as in_file:
                 self.file_contents = in_file.readlines()
+        print('Loading fort.1 data from file:\n' + self.file_name)
 
-        for i, line in enumerate(self.file_contents):
+        for i, line in enumerate(tqdm(self.file_contents)):
             if i % 2 == 0:
                 self._parse_line(line, i)

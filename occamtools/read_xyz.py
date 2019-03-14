@@ -1,4 +1,5 @@
 import numpy as np
+from tqdm import tqdm
 
 
 def _are_floats(*args):
@@ -61,6 +62,7 @@ class Xyz:
     def read_file(self, file_name=None, save=True):
         if file_name is not None:
             self.file_name = file_name
+        print('Loading fort.8 data from file:\n' + self.file_name)
 
         # Go through the file initally and just count the number of lines.
         with open(self.file_name, 'r') as in_file:
@@ -75,7 +77,7 @@ class Xyz:
             self._parse_types(in_file)
 
             in_file.seek(0)
-            for time_step in range(self.n_time_steps_):
+            for time_step in tqdm(range(self.n_time_steps_)):
                 for _ in range(2):
                     line = in_file.readline()
                 if self.comment_format_known:
