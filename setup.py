@@ -4,7 +4,6 @@ setup(
     name='occamtools',
     packages=['occamtools'],
     url='https://github.com/mortele/OccamTools',
-    version='0.0.0',
     license='GPL-3',
     description='Analysis and synthesis tools for OCCAM hPF simulations',
     tags=['occammd', 'hpf', 'md'],
@@ -29,5 +28,7 @@ setup(
         'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.7'
     ],
-    python_requires='>=3.7'
+    python_requires='>=3.7',
+    use_scm_version=True,
+    setup_requires=['setuptools_scm'],
 )

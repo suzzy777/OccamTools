@@ -14,9 +14,9 @@ after_success:
   - codecov -t $CODECOV_PROJECT_TOKEN
   - coverage xml
   - python-codacy-coverage -r coverage.xml
-#deploy:
-#  provider: pypi
-#  user: mortele
-#  password: $pypi_password
-#  on:
-#    tags: true
+deploy:
+  provider: pypi
+  user: mortele
+  password: $pypi_password
+  on:
+    tags: true
