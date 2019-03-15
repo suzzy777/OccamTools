@@ -30,5 +30,5 @@ setup(
     ],
     python_requires='>=3.7',
     use_scm_version=True,
-    setup_requires=['setuptools_scm'],
+    setup_requires=['setuptools_scm']
 )
