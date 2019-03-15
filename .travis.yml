@@ -17,6 +17,6 @@ after_success:
 deploy:
   provider: pypi
   user: mortele
-  password: $pypi_password
+  password: $PYPI_PASSWORD
   on:
     tags: true
