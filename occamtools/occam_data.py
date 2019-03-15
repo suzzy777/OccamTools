@@ -2,6 +2,7 @@ import os
 import numpy as np
 import warnings
 import json
+from tqdm import tqdm
 from occamtools.read_xyz import _are_floats, Xyz
 from occamtools.read_fort1 import Fort1
 from occamtools.read_fort7 import Fort7
@@ -141,7 +142,7 @@ class OccamData:
         if len(args) == 1 and load_from_npy:
             check, class_path = _check_npy_dump_exists(args[0])
             if check:
-                self.load(class_path)
+                self.load(class_path, silent=silent)
                 npy_loaded = True
         if not npy_loaded:
             fort1, fort7, xyz = _check_constructor_input(*args, silent=silent)
@@ -169,14 +170,14 @@ class OccamData:
         self._save_arrays()
         self._delete_array_attributes()
         self._save_class()
-        self._load_arrays(self.save_path)
+        self._load_arrays(self.save_path, silent=True)
         return True
 
-    def load(self, class_path):
-        self._load_arrays(class_path)
+    def load(self, class_path, silent=False):
+        self._load_arrays(class_path, silent=silent)
         self._load_class(class_path)
 
-    def _load_arrays(self, class_path):
+    def _load_arrays(self, class_path, silent):
         files = os.listdir(class_path)
         non_npy_files = []
         for f in files:
@@ -184,10 +185,13 @@ class OccamData:
                 non_npy_files.append(f)
         for f in non_npy_files:
             files.remove(f)
-        for npy_file in files:
-            attribute_name = os.path.basename(npy_file).split('.')[0]
-            setattr(self, attribute_name, np.load(os.path.join(class_path,
-                                                               npy_file)))
+
+        with tqdm(total=len(files)) as pbar:
+            for npy_file in files:
+                attribute_name = os.path.basename(npy_file).split('.')[0]
+                setattr(self, attribute_name, np.load(os.path.join(class_path,
+                                                                   npy_file)))
+                pbar.update(1)
 
     def _save_arrays(self):
         self.save_path = os.path.join(os.path.dirname(self.fort1_file_name),

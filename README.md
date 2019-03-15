@@ -15,6 +15,8 @@ Install by (requires **python >= 3.7**)
 
 Usage
 ---------
+**Loading data**
+&middot;
 Loading simulation data is done by
 ```python
 import numpy as np
@@ -75,6 +77,12 @@ print(plot(kinetic_energy_deviations.tolist()))
 # -50.26  ┤                                      ││╰╯
 # -60.17  ┤                                      ╰╯
 ```
+
+**File storage**
+&middot;
+Behind the scenes, `.npy` (for numpy arrays) and `.json` (for anything else) files are used to represent the simulation data. By default, loading a simulation run causes the saving of small (relative to the original `fort.5/7/8`) binary files containing the data. These are used to load from on subsequent calls. This means calls to `OccamData.load('your/file/here')` of `OccamData('your/file/here')` will be significantly faster *after* the first call. In this specific example, a 25x speedup is achieved (but your mileage may vary).
+![load example](https://i.imgur.com/Wssbx9B.gif)
+
 
 OCCAM
 ---------

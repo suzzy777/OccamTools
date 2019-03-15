@@ -4,7 +4,7 @@ setup(
     name='occamtools',
     packages=['occamtools'],
     url='https://github.com/mortele/OccamTools',
-    version='0.0.1',
+    version='0.0.0',
     license='GPL-3',
     description='Analysis and synthesis tools for OCCAM hPF simulations',
     tags=['occammd', 'hpf', 'md'],
