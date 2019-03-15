@@ -1,18 +1,20 @@
 OccamTools 
 &middot;
 [![Build Status](https://travis-ci.com/mortele/OccamTools.svg?token=81VUNKkUYjZSicZzs1NR&branch=master)](https://travis-ci.com/mortele/OccamTools) [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b91377a289bc42868314310dd6be2b60)](https://www.codacy.com?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mortele/OccamTools&amp;utm_campaign=Badge_Grade) [![codecov](https://codecov.io/gh/mortele/OccamTools/branch/master/graph/badge.svg?token=IXlriBpSwo)](https://codecov.io/gh/mortele/OccamTools) [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-=====
+=========
 Analysis and synthesis tools for [OCCAM](#OCCAM) molecular dynamics/hybrid particle-field simulations.
 
-Input to [OCCAM](#OCCAM) consists mainly of three file types; `fort.1` (simulation metadata), `fort.3` (particle and bond specification), and `fort.5` (positions and bond structure). The output from the run is a `fort.8` file, adhering to the [`.xyz`](https://en.wikipedia.org/wiki/XYZ_file_format) file format. The `occamtools` python package provides a reader for these file formats (both input and output) and generates a single object containing all the information about the simulation, making analysis of simulation runs and comparison between runs easier. 
+Input to [OCCAM](#OCCAM) consists mainly of three file types; `fort.1` (simulation metadata), `fort.3` (particle and bond parameters), and `fort.5` (positions and bond structure). The output from the run is a `fort.8` file, adhering to the [`.xyz`](https://en.wikipedia.org/wiki/XYZ_file_format) file format. The `occamtools` python package provides a reader for these file formats (both input and output) and generates a single object containing all the information about the simulation, making analysis of simulation runs and comparison between runs easier. 
 
-## Installation
+Installation
+---------
 Install by (requires **python >= 3.7**)
 ```bash
 > pip install occamtools
 ```
 
-## Usage
+Usage
+---------
 Loading simulation data is done by
 ```python
 import numpy as np
@@ -52,8 +54,30 @@ print(plot(bins.tolist(), hist.tolist()))
 # 2.00  ┤│      ╰╮
 # 1.00  ┼╯       ╰
 ```
+or plot the deviations of the total kinetic energy from the mean over the simulation run (again requires `pip install asciichartpy`)
+```python
+kinetic_energy_deviations = data.kinetic_energy - np.mean(data.kinetic_energy)
+print(plot(kinetic_energy_deviations.tolist()))
 
-### OCCAM
+#  60.53  ┤            ╭╮
+#  50.62  ┤            ││  ╭╮╭╮
+#  40.71  ┤            ││  ││││              ╭╮
+#  30.81  ┤            ││  ││││              ││     ╭╮    ╭─
+#  20.90  ┤ ╭╮         ││  ││││    ╭─╮       ││     ││    │
+#  10.99  ┤ ││ ╭─╮ ╭╮ ╭╯│  ││││╭╮  │ │ ╭╮    ││     ││    │
+#  10.09  ┤ ││ │ │ ││ │ │  │││││╰╮ │ ╰╮││    ││ ╭╮  ││╭╮╭╮│
+#   0.18  ┼╮││ │ │ ││ │ ╰╮ │││╰╯ │ │  ╰╯│╭╮  │╰╮││╭╮│││││││
+# -00.73  ┤│││ │ │ ││ │  ╰─╯││   │╭╯    ││╰──╯ ╰╯││││││││││
+# -10.64  ┤│││╭╯ │ ││╭╯     ││   ││     ╰╯       ││││││││╰╯
+# -20.54  ┤││╰╯  │ │╰╯      ╰╯   ╰╯              ││││││╰╯
+# -30.45  ┤╰╯    ╰─╯                             ││││╰╯
+# -40.36  ┤                                      ││││
+# -50.26  ┤                                      ││╰╯
+# -60.17  ┤                                      ╰╯
+```
+
+OCCAM
+---------
 OCCAM is a program for Molecular Dynamics Simulations able to perform Hybrid Particle-Field (PF) Theoretical Molecular Dynamics simulations. This recent PF technique combines molecular dynamics (MD) and self consistent field theory (SCF). [Read more.](http://www.occammd.org/about/)
 
 [![occam-website](http://www.occammd.org/wp-content/uploads/2018/08/cropped-Untitled-2-01-2.png)](http://www.occammd.org/)
