@@ -1,11 +1,16 @@
 from setuptools import setup
 
+with open('README.md', 'r') as in_file:
+    readme = in_file.read()
+
 setup(
     name='occamtools',
     packages=['occamtools'],
     url='https://github.com/mortele/OccamTools',
     license='GPL-3',
     description='Analysis and synthesis tools for OCCAM hPF simulations',
+    long_description=readme,
+    long_description_content_type='text/markdown',
     tags=['occammd', 'hpf', 'md'],
     author='Morten Ledum',
     author_email='morten.ledum@gmail.com',
