@@ -44,7 +44,7 @@ def _check_internal_consistency_all(fort1, fort7, xyz):
         return False
 
 
-def _open_fort_files(fort1, fort7, xyz, which=None):
+def _open_fort_files(fort1, fort7, xyz, silent, which=None):
     if which is None:
         f1 = Fort1(fort1)
         f7 = Fort7(fort7)
@@ -67,7 +67,7 @@ def _open_fort_files(fort1, fort7, xyz, which=None):
         x = Xyz(x)
 
     for f in (f1, f7, x):
-        f.read_file(silent=True)
+        f.read_file(silent=silent)
     return f1, f7, x
 
 
@@ -86,7 +86,7 @@ def _check_npy_dump_exists(file_name):
     return exists, class_dir
 
 
-def _check_constructor_input(*args):
+def _check_constructor_input(*args, silent=False):
     if len(args) == 3:
         fort1, fort7, xyz = args
         if (isinstance(fort1, Fort1) and isinstance(fort7, Fort7)
@@ -94,13 +94,13 @@ def _check_constructor_input(*args):
             return fort1, fort7, xyz
         elif (isinstance(fort1, str) and isinstance(fort7, str)
                 and isinstance(xyz, str)):
-            return _open_fort_files(fort1, fort7, xyz)
+            return _open_fort_files(fort1, fort7, xyz, silent)
         elif isinstance(fort1, str):
-            return _open_fort_files(fort1, fort7, xyz, which=0)
+            return _open_fort_files(fort1, fort7, xyz, silent, which=0)
         elif isinstance(fort7, str):
-            return _open_fort_files(fort1, fort7, xyz, which=1)
+            return _open_fort_files(fort1, fort7, xyz, silent, which=1)
         elif isinstance(xyz, str):
-            return _open_fort_files(fort1, fort7, xyz, which=2)
+            return _open_fort_files(fort1, fort7, xyz, silent, which=2)
         else:
             raise ValueError('OccamData constructor input not recognized as '
                              'Fort1/Fort7/Xzy objects or (one or more) file '
@@ -130,13 +130,13 @@ def _check_constructor_input(*args):
             f1 = os.path.join(args[0], 'fort.1')
             f7 = os.path.join(args[0], 'fort.7')
             x = os.path.join(args[0], 'fort.8')
-        return _open_fort_files(f1, f7, x)
+        return _open_fort_files(f1, f7, x, silent)
 
 
 class OccamData:
     save_dir = 'class_data'
 
-    def __init__(self, *args, load_from_npy=True):
+    def __init__(self, *args, load_from_npy=True, silent=False):
         npy_loaded = False
         if len(args) == 1 and load_from_npy:
             check, class_path = _check_npy_dump_exists(args[0])
@@ -144,7 +144,7 @@ class OccamData:
                 self.load(class_path)
                 npy_loaded = True
         if not npy_loaded:
-            fort1, fort7, xyz = _check_constructor_input(*args)
+            fort1, fort7, xyz = _check_constructor_input(*args, silent=silent)
             self.consistent = _check_internal_consistency_all(fort1, fort7,
                                                               xyz)
             ignore = ['file_name', 'n_time_steps_', 'file_contents',
@@ -156,6 +156,7 @@ class OccamData:
             self.fort1_file_name = fort1.file_name
             self.fort7_file_name = fort7.file_name
             self.xyz_file_name = xyz.file_name
+            self.save()
 
     def save(self, overwrite=False):
         self.save_path = os.path.join(os.path.dirname(self.fort1_file_name),

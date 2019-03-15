@@ -2,8 +2,6 @@ sudo: false
 dist: xenial
 language: python
 cache: pip
-env:
-  - CODACY_PROJECT_TOKEN=f0d5e9be6e0a4104956259d20b686976
 python:
   - 3.7.1
 install:
@@ -13,6 +11,12 @@ install:
 script:
   - pytest -v --cov=./
 after_success:
-  - codecov -t a7891cfa-6e25-46f4-a46b-abedaa6a7dfe
+  - codecov -t $CODECOV_PROJECT_TOKEN
   - coverage xml
   - python-codacy-coverage -r coverage.xml
+#deploy:
+#  provider: pypi
+#  user: mortele
+#  password: $pypi_password
+#  on:
+#    tags: true
