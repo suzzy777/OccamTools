@@ -187,8 +187,8 @@ class OccamData:
             files.remove(f)
 
         if not silent:
-            print('Loading data from .npy files in:\n'
-                  + os.path.abspath(class_path))
+            print('Loading data from .npy files in directory:\n'
+                  + os.path.abspath(class_path) + '/')
             with tqdm(total=len(files)) as pbar:
                 for npy_file in files:
                     attribute_name = os.path.basename(npy_file).split('.')[0]

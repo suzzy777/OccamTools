@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from tqdm import tqdm
 
@@ -77,7 +78,8 @@ class Fort7:
         if file_name is not None:
             self.file_name = file_name
         if not silent:
-            print('Loading fort.7 data from file:\n' + self.file_name)
+            print('Loading fort.7 data from file:\n'
+                  + os.path.abspath(self.file_name))
 
         # Go through the file initally and just count the number of lines.
         with open(self.file_name, 'r') as in_file:

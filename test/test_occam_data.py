@@ -202,3 +202,11 @@ def test_occam_data_progress_bars():
     for key in occam_data_silent.__dict__:
         assert _check_equal(occam_data_silent.__dict__[key],
                             occam_data_verbose.__dict__[key])
+    occam_data_verbose.save()
+    occam_data_verbose_npy = OccamData(file_name_fort_1, load_from_npy=False,
+                                       silent=True)
+    occam_data_verbose_npy = OccamData(file_name_fort_1, load_from_npy=True,
+                                       silent=False)
+    for key in occam_data_silent.__dict__:
+        assert _check_equal(occam_data_silent.__dict__[key],
+                            occam_data_verbose_npy.__dict__[key])
