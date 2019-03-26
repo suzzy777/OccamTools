@@ -16,6 +16,8 @@ file_name_fort_7 = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
                                 'fort.7')
 file_name_fort_xyz = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
                                   'fort.8')
+class_dir = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
+                         'class_data')
 ignore = ['file_name', 'n_time_steps_', 'file_contents',
           'comment_format_known', 'num_lines']
 
@@ -156,8 +158,6 @@ def test_occam_data_single_input():
 
 
 def test_occam_data_save_load():
-    class_dir = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
-                             'class_data')
     shutil.rmtree(class_dir, ignore_errors=True)
     occam_data, fort1, fort7, xyz = _create_default_occam_data_object()
     all_attributes = [key for key in occam_data.__dict__]
@@ -210,3 +210,4 @@ def test_occam_data_progress_bars():
     for key in occam_data_silent.__dict__:
         assert _check_equal(occam_data_silent.__dict__[key],
                             occam_data_verbose_npy.__dict__[key])
+    shutil.rmtree(class_dir)
