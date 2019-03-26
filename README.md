@@ -83,7 +83,6 @@ print(plot(kinetic_energy_deviations.tolist()))
 Behind the scenes, `.npy` (for numpy arrays) and `.json` (for anything else) files are used to represent the simulation data. By default, loading a simulation run causes the saving of small (relative to the original `fort.5/7/8`) binary files containing the data. These are used to load from on subsequent calls. This means calls to `OccamData.load('your/file/here')` of `OccamData('your/file/here')` will be significantly faster *after* the first call. In this specific example, a 25x speedup is achieved (but your mileage may vary).
 ![load example](https://i.imgur.com/Wssbx9B.gif)
 
-
 OCCAM
 ---------
 OCCAM is a program for Molecular Dynamics Simulations able to perform Hybrid Particle-Field (PF) Theoretical Molecular Dynamics simulations. This recent PF technique combines molecular dynamics (MD) and self consistent field theory (SCF). [Read more.](http://www.occammd.org/about/)
