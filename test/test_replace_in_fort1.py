@@ -11,6 +11,13 @@ fort1 = Fort1(file_name)
 fort1.read_file()
 
 
+def str2bool(v):
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+
+
 def _assert_fort1s_equal_ignore(a, b, *args):
     ignore = ['file_name', 'file_contents', 'title']
     for arg in args:
@@ -60,4 +67,20 @@ def test_replace_in_fort1_float():
         assert fort1_new.collision_frequency == pytest.approx(freq, abs=1e-14)
         _assert_fort1s_equal_ignore(fort1, fort1_new,
                                     'dt', 'collision_frequency')
+    os.remove(out_file_name)
+
+
+def test_replace_in_fort1_str():
+    out_file_name = os.path.join(os.path.dirname(file_name), 'fort.1_str')
+
+    for ensemble, velocity_read in zip(['NVT', 'NVE', 'NPE'],
+                                       ['no', 'yes', 'no']):
+        replace_in_fort1(file_name, out_file_name,
+                         ensemble=ensemble, velocity_read=velocity_read)
+        fort1_new = Fort1(out_file_name)
+        fort1_new.read_file(silent=True)
+        assert fort1_new.ensemble == ensemble
+        assert fort1_new.velocity_read == str2bool(velocity_read)
+        _assert_fort1s_equal_ignore(fort1, fort1_new,
+                                    'ensemble', 'velocity_read')
     os.remove(out_file_name)
