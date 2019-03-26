@@ -12,8 +12,6 @@ from occamtools.replace_in_fort3 import Fort3Replacement
 
 
 def test_replace_in_fort3_properties():
-    print("\n\n\n")
-
     properties = ['atom', 'bond type', 'bond angle', 'torsion', 'non bonded',
                   'scf', 'compress', 'chi']
     indices = [i for i in range(len(properties))]
@@ -21,5 +19,49 @@ def test_replace_in_fort3_properties():
     for prop, index in zip(properties, indices):
         replacement = Fort3Replacement(property=prop)
         assert replacement.property == index
+    replacement = Fort3Replacement()
+    assert replacement.property is None
 
-    print("\n\n\n")
+    replacement = Fort3Replacement(new=True)
+    assert replacement.new is True
+    assert replacement.replace is False
+
+    replacement.replace = True
+    assert replacement.new is False
+    assert replacement.replace is True
+
+    for inp in ['string', 1, 8.251, int]:
+        caught = False
+        try:
+            replacement.new = inp
+        except TypeError:
+            caught = True
+        assert caught is True
+
+        caught = False
+        try:
+            replacement = Fort3Replacement(new=inp)
+        except TypeError:
+            caught = True
+        assert caught is True
+
+    for a, b in zip([True, False], [False, True]):
+        replacement = Fort3Replacement(new=a, replace=b)
+        assert replacement.new is a
+        assert replacement.replace is b
+
+    for inp in [True, False]:
+        caught = False
+        try:
+            replacement = Fort3Replacement(new=inp, replace=inp)
+        except ValueError:
+            caught = True
+        assert caught is True
+
+    replacement = Fort3Replacement(new=True, replace=None)
+    assert replacement.new is True
+    assert replacement.replace is False
+
+    replacement = Fort3Replacement(new=None, replace=False)
+    assert replacement.new is True
+    assert replacement.replace is False

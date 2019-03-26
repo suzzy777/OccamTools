@@ -14,13 +14,32 @@ class _Properties:
 
 class Fort3Replacement:
     def __init__(self, property=None, replace=None, new=None, content=None):
+        self._content = content
+
         if property is not None:
             self._parse_property_name(property)
         else:
             self.property = property
-        self._replace = replace
-        self._new = new
-        self.content = content
+
+        if isinstance(replace, bool) and isinstance(new, bool):
+            if replace is new:
+                raise ValueError('Replace and new cannot both be ' + str(new))
+            else:
+                self._new = new
+                self._replace = replace
+        elif isinstance(replace, bool) or isinstance(new, bool):
+            if isinstance(replace, bool):
+                self._replace = replace
+                self._new = not replace
+            else:
+                self._new = new
+                self._replace = not new
+        elif (new is None) and (replace is None):
+            self._new = new
+            self._replace = replace
+        else:
+            raise TypeError('Expected None or bool for new and replace, not '
+                            + str(type(new)) + ' and ' + str(type(replace)))
 
     @property
     def new(self):
