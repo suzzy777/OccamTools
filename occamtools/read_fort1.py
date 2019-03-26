@@ -1,3 +1,4 @@
+import os
 from tqdm import tqdm
 
 
@@ -90,7 +91,8 @@ class Fort1:
             with open(self.file_name, 'r') as in_file:
                 self.file_contents = in_file.readlines()
         if not silent:
-            print('Loading fort.1 data from file:\n' + self.file_name)
+            print('Loading fort.1 data from file:\n'
+                  + os.path.abspath(self.file_name))
 
         if silent:
             enumerate_obj = enumerate(self.file_contents)

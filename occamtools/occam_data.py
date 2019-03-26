@@ -186,12 +186,21 @@ class OccamData:
         for f in non_npy_files:
             files.remove(f)
 
-        with tqdm(total=len(files)) as pbar:
+        if not silent:
+            print('Loading data from .npy files in directory:\n'
+                  + os.path.abspath(class_path) + '/')
+            with tqdm(total=len(files)) as pbar:
+                for npy_file in files:
+                    attribute_name = os.path.basename(npy_file).split('.')[0]
+                    setattr(self, attribute_name, np.load(os.path.join(
+                        class_path, npy_file))
+                    )
+                    pbar.update(1)
+        else:
             for npy_file in files:
                 attribute_name = os.path.basename(npy_file).split('.')[0]
                 setattr(self, attribute_name, np.load(os.path.join(class_path,
                                                                    npy_file)))
-                pbar.update(1)
 
     def _save_arrays(self):
         self.save_path = os.path.join(os.path.dirname(self.fort1_file_name),
