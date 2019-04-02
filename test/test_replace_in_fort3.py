@@ -2,10 +2,9 @@ import os
 # import pytest
 # from test.test_occam_data import _check_equal
 # from test_occam_data import _check_equal
-# from occamtools.replace_in_fort3 import (replace_in_fort3, Fort3Replacement,
-#                                          _Properties)
 from occamtools.replace_in_fort3 import (Fort3Replacement, replace_in_fort3,
-                                         _Properties)
+                                         _Properties,
+                                         _count_property_instances)
 
 
 file_name = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
@@ -113,10 +112,66 @@ def test_replace_in_fort3_fort3_properties_index():
 def test_replace_in_fort3_file():
     replace_1 = Fort3Replacement(property='atom', new=True,
                                  content=['H', '1.298', '0.0'])
-    replace_2 = Fort3Replacement(property='atom', replace=True,
-                                 content=['Ar', '3.298', '-1.0'])
+    out_path = replace_in_fort3(file_name, None, replace_1)
+    assert os.path.abspath(out_path) == os.path.abspath(file_name) + '_new'
+    assert os.path.exists(out_path) and os.path.isfile(out_path)
+    os.remove(out_path)
 
-    out_path = replace_in_fort3(file_name, None, replace_1, replace_2)
+    out_file = os.path.join(os.path.dirname(file_name), 'new_fort.3')
+    out_path = replace_in_fort3(file_name, out_file, replace_1)
+    assert os.path.abspath(out_file) == os.path.abspath(out_path)
+    assert os.path.exists(out_path) and os.path.isfile(out_path)
+    os.remove(out_path)
 
-    if os.path.exists(out_path):
-        os.remove(out_path)
+
+def test_replace_in_fort3_count_property():
+    replace_atom0 = Fort3Replacement(property='atom', new=True,
+                                     content=['H', 1.298, 0.0])
+    replace_atom1 = Fort3Replacement(property='atom', replace=True,
+                                     content=['Ar', 3.001, 0.0])
+    replace_atom2 = Fort3Replacement(property='atom', new=True,
+                                     content=['O', 23.72, -1.0])
+    replace_atom3 = Fort3Replacement(property='atom', new=True,
+                                     content=['Be', 11.1, 2.1])
+
+    replace_bond00 = Fort3Replacement(property='bond type', replace=True,
+                                      content=['Ar', 'Ar', 3.5, 118.1])
+    replace_bond01 = Fort3Replacement(property='bond type', new=True,
+                                      content=['Ar', 'H', 5.1, 59.242])
+    replace_bond33 = Fort3Replacement(property='bond type', new=True,
+                                      content=['Be', 'Be', 1.2, 291.285])
+
+    replace_angle000 = Fort3Replacement(property='bond angle', new=True,
+                                        content=['Ar', 'Ar', 'Ar', 90, 300])
+    replace_angle010 = Fort3Replacement(property='bond angle', new=True,
+                                        content=['Ar', 'H', 'Ar', 65, 250])
+    replace_angle112 = Fort3Replacement(property='bond angle', new=True,
+                                        content=['O', 'O', 'Be', 85, 190])
+
+    replace_torsion_0 = Fort3Replacement(
+        property='torsion', new=True, content=['Ar', 'O', 'Be', 'H', 25, 190]
+    )
+    replace_torsion_1 = Fort3Replacement(
+        property='torsion', new=True, content=['Ar', 'Ar', 'Be', 'Be', 10, 80]
+    )
+
+    replace_non_bond11 = Fort3Replacement(property='non bond', replace=True,
+                                          content=['Ar', 'Ar', 1.1, 9.298])
+    replace_non_bond01 = Fort3Replacement(property='non bond', new=True,
+                                          content=['H', 'Ar', 0.23, 2.443])
+    replace_non_bond22 = Fort3Replacement(property='non bond', new=True,
+                                          content=['Be', 'Ar', 2.23, 1.295])
+
+    counts = _count_property_instances(
+        replace_atom0, replace_atom1, replace_atom2, replace_atom3,
+        replace_bond00, replace_bond01, replace_bond33,
+        replace_angle000, replace_angle010, replace_angle112,
+        replace_torsion_0, replace_torsion_1,
+        replace_non_bond01, replace_non_bond11, replace_non_bond22
+    )
+
+    assert counts[0] == 3
+    assert counts[1] == 2
+    assert counts[2] == 3
+    assert counts[3] == 2
+    assert counts[4] == 2

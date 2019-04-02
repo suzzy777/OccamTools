@@ -104,10 +104,11 @@ class Fort3Replacement:
 
 
 def _count_property_instances(*args):
-    print("\n")
-    for prop in args:
-        print(prop)
-    print("\n")
+    counts = {key: 0 for key in range(5)}
+    for p in args:
+        if (p.new is True) and (p.property <= 4):
+            counts[p.property] += 1
+    return counts
 
 
 def replace_in_fort3(input_file, output_path, *args):
@@ -124,7 +125,7 @@ def replace_in_fort3(input_file, output_path, *args):
                                    input_file + '_new')
 
     with open(input_file, 'r') as in_file, open(output_path, 'w') as out_file:
-        _count_property_instances(*args)
+        counts = _count_property_instances(*args)
 
         for i, line in enumerate(in_file):
             out_file.write(line)
