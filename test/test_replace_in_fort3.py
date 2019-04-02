@@ -5,7 +5,8 @@ import os
 from occamtools.replace_in_fort3 import (Fort3Replacement, replace_in_fort3,
                                          _Properties, _is_int,
                                          _count_property_instances,
-                                         _count_existing_instances)
+                                         _count_existing_instances,
+                                         _parse_fort_3_file)
 
 
 file_name = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
@@ -105,11 +106,12 @@ def test_replace_in_fort3_fort3_properties_index():
         caught = False
         try:
             p = _Properties._type_from_index(i)
-        except ValueError:
+        except IndexError:
             caught = True
         assert caught
 
 
+"""
 def test_replace_in_fort3_file():
     replace_1 = Fort3Replacement(property='atom', new=True,
                                  content=['H', '1.298', '0.0'])
@@ -123,6 +125,7 @@ def test_replace_in_fort3_file():
     assert os.path.abspath(out_file) == os.path.abspath(out_path)
     assert os.path.exists(out_path) and os.path.isfile(out_path)
     os.remove(out_path)
+"""
 
 
 def test_replace_in_fort3_count_property():
@@ -191,8 +194,19 @@ def test_replace_in_fort3_is_int():
 
 def test_replace_in_fort3__count_existing_instances():
     counts = _count_existing_instances(file_name)
-    assert counts['atom types'] == 1
-    assert counts['bond types'] == 1
-    assert counts['bond angles'] == 0
-    assert counts['torsions'] == 0
-    assert counts['non-bonded'] == 1
+    assert counts[0] == 4
+    assert counts[1] == 3
+    assert counts[2] == 4
+    assert counts[3] == 2
+    assert counts[4] == 2
+
+
+def test_replace_in_fort3_parse_fort_3_file():
+    all_replacements = test_replace_in_fort3_count_property()
+    replace_atoms = all_replacements[0:4]
+    replace_bonds = all_replacements[4:7]
+    replace_angles = all_replacements[7:10]
+    replace_torsions = all_replacements[10:12]
+    replace_non_bonds = all_replacements[12:]
+
+    ret = _parse_fort_3_file(file_name)

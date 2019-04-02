@@ -17,7 +17,7 @@ class _Properties:
             if not v.startswith('__'):
                 if _Properties.__dict__[v] == index:
                     return v
-        raise ValueError(f'Property index {index} not valid. Expected:\n'
+        raise IndexError(f'Property index {index} not valid. Expected:\n'
                          '0 <= index <= 7')
 
 
@@ -123,18 +123,63 @@ def _is_int(s):
 
 
 def _count_existing_instances(fort_file):
-    counts = {key: 0 for key in ['atom types', 'bond types', 'bond angles',
-                                 'torsions', 'non-bonded']}
+    keys = ['atom types', 'bond types', 'bond angles', 'torsions', 'non-bond']
+    counts = {key: 0 for key in range(5)}
     with open(fort_file, 'r') as in_file:
         for line in in_file:
             sline = line.split()
             if len(sline) > 1:
                 if _is_int(sline[0]):
-                    for key in counts.keys():
+                    for i, key in enumerate(keys):
                         if key in line:
-                            counts[key] = int(sline[0])
+                            counts[i] = int(sline[0])
                             break
     return counts
+
+
+def _parse_fort_3_file(fort_file):
+    atom_name = {}
+    atom_ind, atoms = [], []
+    bond_ind, bonds = [], []
+    with open(fort_file, 'r') as in_file:
+        for _ in range(4):
+            line = in_file.readline()
+        while '*****' not in line:
+            index, name, mass, charge = line.split()
+            index, mass, charge = int(index), float(mass), float(charge)
+            atom_ind.append(index)
+            atom_name[index] = name
+            atoms.append(Fort3Replacement(property='atom', new=True,
+                                          content=[name, mass, charge]))
+            line = in_file.readline()
+
+        for _ in range(3):
+            line = in_file.readline()
+        while '******' not in line:
+            index_1, index_2, sigma, eps = line.split()
+            index_1, index_2 = int(index_1), int(index_2)
+            bond_ind.append((index_1, index_2))
+            content = [atom_name[index_1], atom_name[index_2], sigma, eps]
+            bonds.append(Fort3Replacement(property='bond type', new=True,
+                                          content=content))
+            line = in_file.readline()
+
+        for _ in range(3):
+            line = in_file.readline()
+        while '******' not in line:
+            line = in_file.readline()
+
+        for _ in range(3):
+            line = in_file.readline()
+        while '******' not in line:
+            line = in_file.readline()
+
+        for _ in range(3):
+            line = in_file.readline()
+        while '******' not in line:
+            index_1, index_2, sigma, eps = line.split()
+
+            line = in_file.readline()
 
 
 def replace_in_fort3(input_file, output_path, *args):
@@ -150,10 +195,11 @@ def replace_in_fort3(input_file, output_path, *args):
         output_path = os.path.join(os.path.dirname(input_file),
                                    input_file + '_new')
 
-    with open(input_file, 'r') as in_file, open(output_path, 'w') as out_file:
-        counts = _count_property_instances(*args)
-
-        for i, line in enumerate(in_file):
-            out_file.write(line)
+    fort3 = _parse_fort_3_file(input_file)
+    with open(input_file, 'r') as in_file:
+        new_counts = _count_property_instances(*args)
+        existing_counts = _count_existing_instances(input_file)
+        total = {key: new_counts[key] + existing_counts[key]
+                 for key in new_counts}
 
     return output_path
