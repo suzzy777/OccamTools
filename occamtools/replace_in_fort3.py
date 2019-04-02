@@ -11,6 +11,15 @@ class _Properties:
     COMPRESSIBILITY = 6
     CHI = 7
 
+    @staticmethod
+    def _type_from_index(index):
+        for v in _Properties.__dict__:
+            if not v.startswith('__'):
+                if _Properties.__dict__[v] == index:
+                    return v
+        raise ValueError(f'Property index {index} not valid. Expected:\n'
+                         '0 <= index <= 7')
+
 
 class Fort3Replacement:
     def __init__(self, property=None, replace=None, new=None, content=None):
@@ -87,6 +96,19 @@ class Fort3Replacement:
                             ' recognized')
             raise ValueError(error_string)
 
+    def __repr__(self):
+        prop_type = _Properties._type_from_index(self.property)
+        return (f'Fort3Replacement(property={prop_type}, '
+                f'replace={self._replace}, new={self._new}, '
+                f'content={self._content})')
+
+
+def _count_property_instances(*args):
+    print("\n")
+    for prop in args:
+        print(prop)
+    print("\n")
+
 
 def replace_in_fort3(input_file, output_path, *args):
     """Replace or add to an existing fort.3 file
@@ -100,3 +122,11 @@ def replace_in_fort3(input_file, output_path, *args):
     if (output_path is None) or (output_path == ''):
         output_path = os.path.join(os.path.dirname(input_file),
                                    input_file + '_new')
+
+    with open(input_file, 'r') as in_file, open(output_path, 'w') as out_file:
+        _count_property_instances(*args)
+
+        for i, line in enumerate(in_file):
+            out_file.write(line)
+
+    return output_path
