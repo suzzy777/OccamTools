@@ -197,6 +197,7 @@ def _parse_fort_3_file(fort_file):
         while '******' not in line:  # non-bonded interactions
             index_1, index_2, sigma, eps = line.split()
             index_1, index_2 = int(index_1), int(index_2)
+            sigma, eps = float(sigma), float(eps)
             content = [atom_name[index_1], atom_name[index_2], sigma, eps]
             non_bonds.append(Fort3Replacement(property='non bonded', new=True,
                                               content=content))

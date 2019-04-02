@@ -1,7 +1,6 @@
 import os
 import pytest
-# from test.test_occam_data import _check_equal
-# from test_occam_data import _check_equal
+import numpy as np
 from occamtools.replace_in_fort3 import (Fort3Replacement,
                                          _Properties, _is_int,
                                          _count_property_instances,
@@ -208,14 +207,6 @@ def test_replace_in_fort3_fort3_replacement_repr():
 
 def test_replace_in_fort3_parse_fort_3_file():
     tol = 1e-14
-    """
-    all_replacements = test_replace_in_fort3_count_property()
-    replace_atoms = all_replacements[0:4]
-    replace_bonds = all_replacements[4:7]
-    replace_angles = all_replacements[7:10]
-    replace_torsions = all_replacements[10:12]
-    replace_non_bonds = all_replacements[12:]
-    """
     atom_names, atoms, bonds, angles, torsions, non_bonds, scf, kappa, chi = (
         _parse_fort_3_file(file_name)
     )
@@ -230,8 +221,6 @@ def test_replace_in_fort3_parse_fort_3_file():
         assert mass == pytest.approx(atom._content[1], abs=tol)
         assert charge == pytest.approx(atom._content[2], abs=tol)
 
-    for b in bonds:
-        print(b)
     expected_bonds = [(1, 1), (1, 2), (2, 4)]
     expected_bond_lengths = [3.21, 2.01, 5.98]
     expected_bond_eps = [2.4, 1.7, 8.8]
@@ -252,3 +241,36 @@ def test_replace_in_fort3_parse_fort_3_file():
             assert atom_names[a] == b
         assert angle._content[3] == pytest.approx(theta, abs=tol)
         assert angle._content[4] == pytest.approx(eps, abs=tol)
+
+    expected_torsions = [(1, 2, 3, 4), (2, 2, 2, 2)]
+    expected_torsion_phi = [75.0, 12.5]
+    expected_torsion_eps = [27.78, 0.24]
+    for ind, theta, eps, torsion in zip(expected_torsions,
+                                        expected_torsion_phi,
+                                        expected_torsion_eps, torsions):
+        for a, b in zip(ind, torsion._content[:4]):
+            assert atom_names[a] == b
+        assert torsion._content[4] == pytest.approx(theta, abs=tol)
+        assert torsion._content[5] == pytest.approx(eps, abs=tol)
+
+    expected_non_bonds = [(1, 1), (2, 2)]
+    expected_non_bond_sigma = [1.8, 3.2]
+    expected_non_bond_eps = [29.14, 2.349]
+    for ind, sigma, eps, bond in zip(expected_non_bonds,
+                                     expected_non_bond_sigma,
+                                     expected_non_bond_eps, non_bonds):
+        for a, b in zip(ind, bond._content[:2]):
+            assert atom_names[a] == b
+        assert bond._content[2] == pytest.approx(sigma, abs=tol)
+        assert bond._content[3] == pytest.approx(eps, abs=tol)
+
+    for m, expected in zip(scf, [5, 5, 10]):
+        assert m == expected
+
+    assert kappa == pytest.approx(1.204, abs=tol)
+
+    expected_chi = [[0, 1,  0, -4],
+                    [1, 0,  2,  0],
+                    [0, 2,  0,  3],
+                    [-4, 0,  3,  0]]
+    assert np.allclose(expected_chi, chi)
