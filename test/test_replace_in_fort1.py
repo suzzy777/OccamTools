@@ -8,7 +8,7 @@ from test.test_occam_data import _check_equal
 file_name = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
                          'fort.1')
 fort1 = Fort1(file_name)
-fort1.read_file()
+fort1.read_file(silent=True)
 
 
 def str2bool(v):
