@@ -1,4 +1,5 @@
 import os
+import numpy as np
 
 
 class _Properties:
@@ -139,15 +140,18 @@ def _count_existing_instances(fort_file):
 
 def _parse_fort_3_file(fort_file):
     atom_name = {}
-    atom_ind, atoms = [], []
-    bond_ind, bonds = [], []
+    atoms = []
+    bonds = []
+    angles = []
+    torsions = []
+    non_bonds = []
+
     with open(fort_file, 'r') as in_file:
         for _ in range(4):
             line = in_file.readline()
-        while '*****' not in line:
+        while '*****' not in line:  # atom types
             index, name, mass, charge = line.split()
             index, mass, charge = int(index), float(mass), float(charge)
-            atom_ind.append(index)
             atom_name[index] = name
             atoms.append(Fort3Replacement(property='atom', new=True,
                                           content=[name, mass, charge]))
@@ -155,10 +159,10 @@ def _parse_fort_3_file(fort_file):
 
         for _ in range(3):
             line = in_file.readline()
-        while '******' not in line:
+        while '******' not in line:  # bond types
             index_1, index_2, sigma, eps = line.split()
             index_1, index_2 = int(index_1), int(index_2)
-            bond_ind.append((index_1, index_2))
+            sigma, eps = float(sigma), float(eps)
             content = [atom_name[index_1], atom_name[index_2], sigma, eps]
             bonds.append(Fort3Replacement(property='bond type', new=True,
                                           content=content))
@@ -166,20 +170,52 @@ def _parse_fort_3_file(fort_file):
 
         for _ in range(3):
             line = in_file.readline()
-        while '******' not in line:
+        while '******' not in line:  # bond angles
+            ind1, ind2, ind3, theta, eps = line.split()
+            ind1, ind2, ind3 = (int(i) for i in (ind1, ind2, ind3))
+            theta, eps = float(theta), float(eps)
+            content = [atom_name[ind1], atom_name[ind2], atom_name[ind3],
+                       theta, eps]
+            angles.append(Fort3Replacement(property='bond angle', new=True,
+                                           content=content))
             line = in_file.readline()
 
         for _ in range(3):
             line = in_file.readline()
-        while '******' not in line:
+        while '******' not in line:  # torsions
+            ind1, ind2, ind3, ind4, phi, eps = line.split()
+            ind1, ind2, ind3, ind4 = (int(i) for i in (ind1, ind2, ind3, ind4))
+            phi, eps = float(phi), float(eps)
+            content = [atom_name[ind1], atom_name[ind2], atom_name[ind3],
+                       atom_name[ind4], phi, eps]
+            torsions.append(Fort3Replacement(property='bond angle', new=True,
+                                             content=content))
             line = in_file.readline()
 
         for _ in range(3):
             line = in_file.readline()
-        while '******' not in line:
+        while '******' not in line:  # non-bonded interactions
             index_1, index_2, sigma, eps = line.split()
-
+            index_1, index_2 = int(index_1), int(index_2)
+            content = [atom_name[index_1], atom_name[index_2], sigma, eps]
+            non_bonds.append(Fort3Replacement(property='non bonded', new=True,
+                                              content=content))
             line = in_file.readline()
+
+        for _ in range(2):
+            line = in_file.readline()
+        scf = [int(i) for i in line.split()]
+        for _ in range(2):
+            line = in_file.readline()
+        kappa = float(line)
+        line = in_file.readline()
+        chi = np.empty(shape=(len(atom_name), len(atom_name)))
+        for i in range(chi.shape[1]):
+            sline = in_file.readline().split()
+            chi[i, :] = np.asarray([float(s) for s in sline])
+
+        return (atom_name, atoms, bonds, angles, torsions, non_bonds, scf,
+                kappa, chi)
 
 
 def replace_in_fort3(input_file, output_path, *args):

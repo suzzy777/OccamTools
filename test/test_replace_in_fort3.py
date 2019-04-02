@@ -1,8 +1,8 @@
 import os
-# import pytest
+import pytest
 # from test.test_occam_data import _check_equal
 # from test_occam_data import _check_equal
-from occamtools.replace_in_fort3 import (Fort3Replacement, replace_in_fort3,
+from occamtools.replace_in_fort3 import (Fort3Replacement,
                                          _Properties, _is_int,
                                          _count_property_instances,
                                          _count_existing_instances,
@@ -201,12 +201,54 @@ def test_replace_in_fort3__count_existing_instances():
     assert counts[4] == 2
 
 
+def test_replace_in_fort3_fort3_replacement_repr():
+    r = Fort3Replacement(property='atom', new=True, content=['H', 1.008, 0.0])
+    assert isinstance(repr(r), str)
+
+
 def test_replace_in_fort3_parse_fort_3_file():
+    tol = 1e-14
+    """
     all_replacements = test_replace_in_fort3_count_property()
     replace_atoms = all_replacements[0:4]
     replace_bonds = all_replacements[4:7]
     replace_angles = all_replacements[7:10]
     replace_torsions = all_replacements[10:12]
     replace_non_bonds = all_replacements[12:]
+    """
+    atom_names, atoms, bonds, angles, torsions, non_bonds, scf, kappa, chi = (
+        _parse_fort_3_file(file_name)
+    )
+    expected_names = ['O', 'H', 'Be', 'H+']
+    for name in expected_names:
+        assert name in atom_names.values()
+    expected_masses = [15.999, 1.008, 9.012, 1.007]
+    expected_charges = [0.0, 0.0, 0.0, 1.0]
+    for name, mass, charge, atom in zip(expected_names, expected_masses,
+                                        expected_charges, atoms):
+        assert name == atom._content[0]
+        assert mass == pytest.approx(atom._content[1], abs=tol)
+        assert charge == pytest.approx(atom._content[2], abs=tol)
 
-    ret = _parse_fort_3_file(file_name)
+    for b in bonds:
+        print(b)
+    expected_bonds = [(1, 1), (1, 2), (2, 4)]
+    expected_bond_lengths = [3.21, 2.01, 5.98]
+    expected_bond_eps = [2.4, 1.7, 8.8]
+    for ind, length, eps, bond in zip(expected_bonds, expected_bond_lengths,
+                                      expected_bond_eps, bonds):
+        for a, b in zip(ind, bond._content[:2]):
+            assert atom_names[a] == b
+        assert bond._content[2] == pytest.approx(length, abs=tol)
+        assert bond._content[3] == pytest.approx(eps, abs=tol)
+
+    expected_bond_angles = [(1, 1, 1), (1, 2, 1), (3, 4, 3), (4, 4, 4)]
+    expected_bond_theta = [75.0, 64.1, 90.9, 71.0]
+    expected_bond_eps = [7.1, 4.0, 1.6, 17.2]
+    for ind, theta, eps, angle in zip(expected_bond_angles,
+                                      expected_bond_theta, expected_bond_eps,
+                                      angles):
+        for a, b in zip(ind, angle._content[:3]):
+            assert atom_names[a] == b
+        assert angle._content[3] == pytest.approx(theta, abs=tol)
+        assert angle._content[4] == pytest.approx(eps, abs=tol)
