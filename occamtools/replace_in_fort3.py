@@ -111,6 +111,32 @@ def _count_property_instances(*args):
     return counts
 
 
+def _is_int(s):
+    try:
+        s = float(s)
+        if s.is_integer():
+            return True
+        else:
+            return False
+    except ValueError:
+        return False
+
+
+def _count_existing_instances(fort_file):
+    counts = {key: 0 for key in ['atom types', 'bond types', 'bond angles',
+                                 'torsions', 'non-bonded']}
+    with open(fort_file, 'r') as in_file:
+        for line in in_file:
+            sline = line.split()
+            if len(sline) > 1:
+                if _is_int(sline[0]):
+                    for key in counts.keys():
+                        if key in line:
+                            counts[key] = int(sline[0])
+                            break
+    return counts
+
+
 def replace_in_fort3(input_file, output_path, *args):
     """Replace or add to an existing fort.3 file
 

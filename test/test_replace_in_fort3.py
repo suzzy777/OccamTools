@@ -3,8 +3,9 @@ import os
 # from test.test_occam_data import _check_equal
 # from test_occam_data import _check_equal
 from occamtools.replace_in_fort3 import (Fort3Replacement, replace_in_fort3,
-                                         _Properties,
-                                         _count_property_instances)
+                                         _Properties, _is_int,
+                                         _count_property_instances,
+                                         _count_existing_instances)
 
 
 file_name = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
@@ -162,16 +163,36 @@ def test_replace_in_fort3_count_property():
     replace_non_bond22 = Fort3Replacement(property='non bond', new=True,
                                           content=['Be', 'Ar', 2.23, 1.295])
 
-    counts = _count_property_instances(
+    all_replacements = (
         replace_atom0, replace_atom1, replace_atom2, replace_atom3,
         replace_bond00, replace_bond01, replace_bond33,
         replace_angle000, replace_angle010, replace_angle112,
         replace_torsion_0, replace_torsion_1,
         replace_non_bond01, replace_non_bond11, replace_non_bond22
     )
+    counts = _count_property_instances(*all_replacements)
 
     assert counts[0] == 3
     assert counts[1] == 2
     assert counts[2] == 3
     assert counts[3] == 2
     assert counts[4] == 2
+    return all_replacements
+
+
+def test_replace_in_fort3_is_int():
+    assert _is_int('2824')
+    assert not _is_int('kdgkjg')
+    assert _is_int(9285)
+    assert not _is_int(2.52958)
+    assert _is_int(-29859)
+    assert _is_int('-29859')
+
+
+def test_replace_in_fort3__count_existing_instances():
+    counts = _count_existing_instances(file_name)
+    assert counts['atom types'] == 1
+    assert counts['bond types'] == 1
+    assert counts['bond angles'] == 0
+    assert counts['torsions'] == 0
+    assert counts['non-bonded'] == 1
