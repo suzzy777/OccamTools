@@ -5,7 +5,8 @@ from occamtools.replace_in_fort3 import (Fort3Replacement,
                                          _Properties, _is_int,
                                          _count_property_instances,
                                          _count_existing_instances,
-                                         _parse_fort_3_file)
+                                         _parse_fort_3_file,
+                                         _sort_new_replace_args)
 
 
 file_name = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
@@ -274,3 +275,40 @@ def test_replace_in_fort3_parse_fort_3_file():
                     [0, 2,  0,  3],
                     [-4, 0,  3,  0]]
     assert np.allclose(expected_chi, chi)
+
+
+def test_replace_in_fort3_sort_new_replace_args():
+    tol = 1e-14
+    atom_name, atoms, bonds, angles, torsions, non_bonds, scf, kappa, chi = (
+        _parse_fort_3_file(file_name)
+    )
+    repl = (
+        Fort3Replacement('atom', new=True, content=['P', 30.973, 0.0]),
+        Fort3Replacement('atom', replace=True, content=['O', 16.000, 0.0]),
+        Fort3Replacement('atom', new=True, content=['Ar-', 39.948, -1.0]),
+    )
+    atom_name, atoms, bonds, angles, torsions, non_bonds, scf, kappa, chi = (
+        _sort_new_replace_args(atom_name, atoms, bonds, angles, torsions,
+                               non_bonds, scf, kappa, chi, *repl)
+    )
+    assert len(atoms) == 6
+    assert atoms[0]._content[0] == 'O'
+    assert atoms[0]._content[1] == pytest.approx(16.0, abs=tol)
+    for name, mass, charge in zip(['P', 'Ar-'], [30.973, 39.948], [0.0, -1.0]):
+        found = False
+        for atom in atoms[4:]:
+            if name == atom._content[0]:
+                found = True
+                assert atom._content[1] == pytest.approx(mass, abs=tol)
+                assert atom._content[2] == pytest.approx(charge, abs=tol)
+        assert found
+
+    print('', end='\n\n')
+    for i, a in enumerate(atoms):
+        print(i, a)
+    print('', end='\n\n')
+
+    # 1          O    15.999      0.0
+    # 2          H     1.008      0.0
+    # 3          Be    9.012      0.0
+    # 4          H+    1.007      1.0

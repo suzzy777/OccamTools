@@ -219,6 +219,36 @@ def _parse_fort_3_file(fort_file):
                 kappa, chi)
 
 
+def _sort_new_replace_args(atom_name, atoms, bonds, angles, torsions,
+                           non_bonds, scf, kappa, chi, *args):
+    for arg in args:
+        if arg.property == _Properties.ATOM_TYPE:
+            if arg.new is True:
+                atoms.append(arg)
+            elif arg.replace is True:
+                name = arg._content[0]
+                found = False
+                index = None
+                for i, atom in enumerate(atoms):
+                    if name == atom._content[0]:
+                        found = True
+                        index = i
+                        break
+                if found:
+                    atoms[i] = arg
+                else:
+                    error_str = (f'No existing atom with name {name} was '
+                                 f'found to replace with {repr(args)}')
+                    raise ValueError(error_str)
+            else:
+                error_str = (f'Property {repr(arg)} has neither the new or the'
+                             ' replace flag set')
+                raise ValueError(error_str)
+
+    return (atom_name, atoms, bonds, angles, torsions, non_bonds, scf, kappa,
+            chi)
+
+
 def replace_in_fort3(input_file, output_path, *args):
     """Replace or add to an existing fort.3 file
 
@@ -232,11 +262,14 @@ def replace_in_fort3(input_file, output_path, *args):
         output_path = os.path.join(os.path.dirname(input_file),
                                    input_file + '_new')
 
-    fort3 = _parse_fort_3_file(input_file)
-    with open(input_file, 'r') as in_file:
-        new_counts = _count_property_instances(*args)
-        existing_counts = _count_existing_instances(input_file)
-        total = {key: new_counts[key] + existing_counts[key]
-                 for key in new_counts}
+    atom_name, atoms, bonds, angles, torsions, non_bonds, scf, kappa, chi = (
+        _parse_fort_3_file(input_file)
+    )
+    _sort_new_replace_args(atom_name, atoms, bonds, angles, torsions,
+                           non_bonds, scf, kappa, chi, *args)
+    new_counts = _count_property_instances(*args)
+    existing_counts = _count_existing_instances(input_file)
+    total = {key: new_counts[key] + existing_counts[key]
+             for key in new_counts}
 
     return output_path
