@@ -221,6 +221,11 @@ def _parse_fort_3_file(fort_file):
 
 def _sort_new_replace_args_atom(atom_name, atoms, *args):
     for arg in args:
+        if len(arg._content) != 3:
+            error_str = (f'Invalid content for replacement object {repr(arg)},'
+                         f' the content kwarg must have length 3, not '
+                         f'{len(arg._content)}')
+            raise ValueError()
         if arg.property == _Properties.ATOM_TYPE:
             name = arg._content[0]
             found = False
@@ -244,6 +249,50 @@ def _sort_new_replace_args_atom(atom_name, atoms, *args):
                              f'found to replace with {repr(args)}')
                 raise ValueError(error_str)
     return atom_name, atoms
+
+
+def _sort_new_replace_args_bonds(atom_names, bonds, *args):
+    for arg in args:
+        if len(arg._content) != 4:
+            error_str = (f'Invalid content for replacement object {repr(arg)},'
+                         f' the content kwarg must have length 4, not '
+                         f'{len(arg._content)}')
+            raise ValueError()
+        if arg.property == _Properties.BOND_TYPE:
+            name_1, name_2 = arg._content[:2]
+            if name_1 not in atom_names.values():
+                error_str = (f'Cannot establish bond type {repr(arg)}, '
+                             f'between atoms {name_1} and {name_2}. {name_1} '
+                             f'not found in atom dict: {atom_names}.')
+                raise ValueError(error_str)
+            elif name_2 not in atom_names.values():
+                error_str = (f'Cannot establish bond type {repr(arg)}, '
+                             f'between atoms {name_1} and {name_2}. {name_2} '
+                             f'not found in atom dict: {atom_names}.')
+                raise ValueError(error_str)
+
+            found = False
+            index = None
+            for i, bond in enumerate(bonds):
+                n1, n2 = bond._content[:2]
+                if (((name_1 == n1) and (name_2 == n2)) or
+                        ((name_1 == n2) and (name_2 == n1))):
+                    found = True
+                    index = i
+                    break
+            if found and (arg.replace is True):
+                bonds[index] = arg
+            elif found and (arg.new is True):
+                error_str = (f'Cannot add bond type {repr(arg)}, a bond '
+                             f' between {name_1} and {name_2} already exists')
+                raise ValueError(error_str)
+            elif (not found) and (arg.new is True):
+                bonds.append(arg)
+            elif (not found) and (arg.replace is True):
+                error_str = (f'No existing bond between {name_1} and {name_2} '
+                             f'was found to replace with {repr(arg)}')
+                raise ValueError(error_str)
+    return bonds
 
 
 def replace_in_fort3(input_file, output_path, *args):

@@ -1,12 +1,14 @@
 import os
 import pytest
 import numpy as np
+from copy import deepcopy as dc
 from occamtools.replace_in_fort3 import (Fort3Replacement,
                                          _Properties, _is_int,
                                          _count_property_instances,
                                          _count_existing_instances,
                                          _parse_fort_3_file,
-                                         _sort_new_replace_args_atom)
+                                         _sort_new_replace_args_atom,
+                                         _sort_new_replace_args_bonds)
 
 
 file_name = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
@@ -302,37 +304,68 @@ def test_replace_in_fort3_sort_new_replace_args_atoms():
         assert found
 
     caught = False
-    repl = Fort3Replacement('atom', new=True, content=['O', 1, 0]),
-    try:
-        print("\n\nBefore:")
-        for a in atoms:
-            print(a)
-        atom_names, atoms = _sort_new_replace_args_atom(atom_names, atoms, *repl)
-        print("\n\n")
-        for a in atoms:
-            print(a)
-        print("\n\n")
-    except ValueError:
-        caught = True
-    assert caught is True
+    repl = (
+        Fort3Replacement('atom', new=True, content=['Ar', 0]),
+        Fort3Replacement('atom', new=True, content=['O', 1, 0]),
+        Fort3Replacement('atom', replace=True, content=['not', 1, 0]),
+    )
+    for r in repl:
+        try:
+            _sort_new_replace_args_atom(atom_names, atoms, r)
+        except ValueError:
+            caught = True
+        assert caught is True
 
-    caught = False
-    repl = Fort3Replacement('atom', new=True, content=['O', 1, 0]),
-    try:
-        _sort_new_replace_args_atom(atom_names, atoms, *repl)
-    except ValueError:
-        caught = True
-    assert caught is True
 
-    caught = False
-    repl = Fort3Replacement('atom', replace=True, content=['not', 1, 0]),
-    try:
-        _sort_new_replace_args_atom(atom_names, atoms, *repl)
-    except ValueError:
-        caught = True
-    assert caught is True
+def test_replace_in_fort3_sort_new_replace_args_bonds():
+    tol = 1e-14
+    atom_names, atoms, bonds, angles, torsions, non_bonds, scf, kappa, chi = (
+        _parse_fort_3_file(file_name)
+    )
+    repl = (
+        Fort3Replacement('bond type', replace=True, content=['H', 'O', 4, 2]),
+        Fort3Replacement('bond type', replace=True, content=['H+', 'H', 7, 6]),
+        Fort3Replacement('bond type', new=True, content=['H', 'H', 9.1, 3.6]),
+        Fort3Replacement('bond type', new=True, content=['H+', 'O', 9.4, 3.3]),
+    )
+    bonds_new = _sort_new_replace_args_bonds(atom_names, dc(bonds), *repl)
+    assert len(bonds_new) == 5
+    names = [('H', 'O'), ('H+', 'H'), ('H', 'H'), ('H+', 'O')]
+    lengths = [4.0, 7.0, 9.1, 9.4]
+    epsilons = [2.0, 6.0, 3.6, 3.3]
+    for name, length, eps in zip(names, lengths, epsilons):
+        found = False
+        n1, n2 = name
 
-    # 1          O    15.999      0.0
-    # 2          H     1.008      0.0
-    # 3          Be    9.012      0.0
-    # 4          H+    1.007      1.0
+        for bond in bonds_new:
+            name_1, name_2 = bond._content[:2]
+            if (((name_1 == n1) and (name_2 == n2)) or
+                    ((name_1 == n2) and (name_2 == n1))):
+                found = True
+                assert bond._content[2] == pytest.approx(length, abs=tol)
+                assert bond._content[3] == pytest.approx(eps, abs=tol)
+        assert found
+
+    for n1, n2 in zip(['not', 'H'], ['H', 'not']):
+        caught = False
+        repl = Fort3Replacement('bond type', new=True, content=[n1, n2, 0, 0]),
+        try:
+            _sort_new_replace_args_bonds(atom_names, dc(bonds), *repl)
+        except ValueError:
+            caught = True
+        assert caught is True
+
+    repl = (
+        Fort3Replacement('bond type', new=True, content=['O', 0, 0]),
+        Fort3Replacement('bond type', new=True, content=['O', 'O', 0, 0]),
+        Fort3Replacement('bond type', replace=True, content=['.', 'H', 0, 0]),
+        Fort3Replacement('bond type', new=True, content=['H', 'O', 0, 0]),
+        Fort3Replacement('bond type', replace=True, content=['H', 'H', 0, 0]),
+    )
+    for r in repl:
+        caught = False
+        try:
+            _sort_new_replace_args_bonds(atom_names, dc(bonds), r)
+        except ValueError:
+            caught = True
+        assert caught is True
