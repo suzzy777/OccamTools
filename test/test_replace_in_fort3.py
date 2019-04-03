@@ -1,14 +1,14 @@
 import os
 import pytest
 import numpy as np
-from copy import deepcopy as dc
 from occamtools.replace_in_fort3 import (Fort3Replacement,
                                          _Properties, _is_int,
                                          _count_property_instances,
                                          _count_existing_instances,
                                          _parse_fort_3_file,
                                          _sort_new_replace_args_atom,
-                                         _sort_new_replace_args_bonds)
+                                         _sort_new_replace_args_bonds,
+                                         _sort_new_replace_args_angles)
 
 
 file_name = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
@@ -328,7 +328,7 @@ def test_replace_in_fort3_sort_new_replace_args_bonds():
         Fort3Replacement('bond type', new=True, content=['H', 'H', 9.1, 3.6]),
         Fort3Replacement('bond type', new=True, content=['H+', 'O', 9.4, 3.3]),
     )
-    bonds_new = _sort_new_replace_args_bonds(atom_names, dc(bonds), *repl)
+    bonds_new = _sort_new_replace_args_bonds(atom_names, bonds, *repl)
     assert len(bonds_new) == 5
     names = [('H', 'O'), ('H+', 'H'), ('H', 'H'), ('H+', 'O')]
     lengths = [4.0, 7.0, 9.1, 9.4]
@@ -350,7 +350,7 @@ def test_replace_in_fort3_sort_new_replace_args_bonds():
         caught = False
         repl = Fort3Replacement('bond type', new=True, content=[n1, n2, 0, 0]),
         try:
-            _sort_new_replace_args_bonds(atom_names, dc(bonds), *repl)
+            _sort_new_replace_args_bonds(atom_names, bonds, *repl)
         except ValueError:
             caught = True
         assert caught is True
@@ -365,7 +365,74 @@ def test_replace_in_fort3_sort_new_replace_args_bonds():
     for r in repl:
         caught = False
         try:
-            _sort_new_replace_args_bonds(atom_names, dc(bonds), r)
+            _sort_new_replace_args_bonds(atom_names, bonds, r)
         except ValueError:
             caught = True
         assert caught is True
+
+
+def test_replace_in_fort3_sort_new_replace_args_angles():
+    tol = 1e-14
+    atom_names, atoms, bonds, angles, torsions, non_bonds, scf, kappa, chi = (
+        _parse_fort_3_file(file_name)
+    )
+    repl = (
+        Fort3Replacement('angle', replace=True, content=['O', 'O', 'O', 4, 2]),
+        Fort3Replacement('angle', replace=True, content=['O', 'H', 'O', 7, 6]),
+        Fort3Replacement('angle', replace=True, content=['H', 'O', 'O', 3, 1]),
+        Fort3Replacement('angle', new=True, content=['Be', 'H', 'H', 9, 3]),
+        Fort3Replacement('angle', new=True, content=['H', 'O', 'H', 9.4, 3.3]),
+    )
+    angles_new = _sort_new_replace_args_angles(atom_names, angles, *repl)
+    assert len(angles_new) == 7
+    names = [('O', 'O', 'O'), ('O', 'H', 'O'), ('Be', 'H', 'H'),
+             ('H', 'O', 'H'), ('O', 'O', 'H')]
+    lengths = [4.0, 7.0, 9.0, 9.4, 3.0]
+    epsilons = [2.0, 6.0, 3.0, 3.3, 1.0]
+    for name, length, eps in zip(names, lengths, epsilons):
+        found = False
+        n1, n2, n3 = name
+        for angle in angles_new:
+            name_1, name_2, name_3 = angle._content[:3]
+            if name_2 == n2:
+                if (name_1 == n1) and (name_3 == n3):
+                    found = True
+                    assert angle._content[3] == pytest.approx(length, abs=tol)
+                    assert angle._content[4] == pytest.approx(eps, abs=tol)
+                    break
+                elif (name_3 == n1) and (name_1 == n3):
+                    found = True
+                    assert angle._content[3] == pytest.approx(length, abs=tol)
+                    assert angle._content[4] == pytest.approx(eps, abs=tol)
+                    break
+        assert found
+
+    for n1, n2, n3 in zip(['not', 'H', 'O'], ['H', 'not', 'O'],
+                          ['H', 'O', 'not']):
+        caught = False
+        repl = Fort3Replacement('angle', new=True, content=[n1, n2, n3, 0, 0]),
+        try:
+            _sort_new_replace_args_angles(atom_names, angles, *repl)
+        except ValueError:
+            caught = True
+        assert caught is True
+
+    repl = (
+        Fort3Replacement('angle', new=True, content=['O', 'H', 0, 0]),
+        Fort3Replacement('angle', new=True, content=['O', 'O', 'O', 0, 0]),
+        Fort3Replacement('angle', replace=True, content=['.', 'H', 'A', 0, 0]),
+        Fort3Replacement('angle', new=True, content=['not', 'O', 0, 0]),
+        Fort3Replacement('angle', replace=True, content=['O', 'O', 'H+', 0,
+                                                         0]),
+    )
+    for r in repl:
+        caught = False
+        try:
+            _sort_new_replace_args_angles(atom_names, angles, r)
+        except ValueError:
+            caught = True
+        assert caught is True
+
+
+if __name__ == '__main__':
+    test_replace_in_fort3_sort_new_replace_args_angles()

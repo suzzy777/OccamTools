@@ -1,4 +1,5 @@
 import os
+from copy import deepcopy
 import numpy as np
 
 
@@ -80,7 +81,7 @@ class Fort3Replacement:
             self.property = _Properties.ATOM_TYPE
         elif 'bond' in p and 'type' in p:
             self.property = _Properties.BOND_TYPE
-        elif 'bond' in p and 'ang' in p:
+        elif 'angle' in p:
             self.property = _Properties.BOND_ANGLE
         elif 'torsion' in p:
             self.property = _Properties.TORSION
@@ -219,7 +220,9 @@ def _parse_fort_3_file(fort_file):
                 kappa, chi)
 
 
-def _sort_new_replace_args_atom(atom_name, atoms, *args):
+def _sort_new_replace_args_atom(atom_names_, atoms_, *args):
+    atom_names = deepcopy(atom_names_)
+    atoms = deepcopy(atoms_)
     for arg in args:
         if len(arg._content) != 3:
             error_str = (f'Invalid content for replacement object {repr(arg)},'
@@ -243,15 +246,17 @@ def _sort_new_replace_args_atom(atom_name, atoms, *args):
                 raise ValueError(error_str)
             elif (not found) and (arg.new is True):
                 atoms.append(arg)
-                atom_name[max(atom_name)+1] = arg._content[0]
+                atom_names[max(atom_names)+1] = arg._content[0]
             elif (not found) and (arg.replace is True):
                 error_str = (f'No existing atom with name {name} was '
                              f'found to replace with {repr(args)}')
                 raise ValueError(error_str)
-    return atom_name, atoms
+    return atom_names, atoms
 
 
-def _sort_new_replace_args_bonds(atom_names, bonds, *args):
+def _sort_new_replace_args_bonds(atom_names_, bonds_, *args):
+    atom_names = deepcopy(atom_names_)
+    bonds = deepcopy(bonds_)
     for arg in args:
         if len(arg._content) != 4:
             error_str = (f'Invalid content for replacement object {repr(arg)},'
@@ -295,6 +300,62 @@ def _sort_new_replace_args_bonds(atom_names, bonds, *args):
     return bonds
 
 
+def _sort_new_replace_args_angles(atom_names_, angles_, *args):
+    atom_names = deepcopy(atom_names_)
+    angles = deepcopy(angles_)
+    for arg in args:
+        if len(arg._content) != 5:
+            error_str = (f'Invalid content for replacement object {repr(arg)},'
+                         f' the content kwarg must have length 4, not '
+                         f'{len(arg._content)}')
+            raise ValueError()
+        if arg.property == _Properties.BOND_ANGLE:
+            name_1, name_2, name_3 = arg._content[:3]
+            if name_1 not in atom_names.values():
+                error_str = (f'Cannot establish bond angle {repr(arg)}, '
+                             f'between atoms {name_1}, {name_2}, and {name_3}.'
+                             f' {name_1} not found in atom dict: {atom_names}')
+                raise ValueError(error_str)
+            elif name_2 not in atom_names.values():
+                error_str = (f'Cannot establish bond angle {repr(arg)}, '
+                             f'between atoms {name_1}, {name_2}, and {name_3}.'
+                             f' {name_2} not found in atom dict: {atom_names}')
+                raise ValueError(error_str)
+            elif name_3 not in atom_names.values():
+                error_str = (f'Cannot establish bond angle {repr(arg)}, '
+                             f'between atoms {name_1}, {name_2}, and {name_3}.'
+                             f' {name_3} not found in atom dict: {atom_names}')
+                raise ValueError(error_str)
+            found = False
+            index = None
+            for i, angle in enumerate(angles):
+                n1, n2, n3 = angle._content[:3]
+                if n2 == name_2:
+                    if (name_1 == n1) and (name_3 == n3):
+                        found = True
+                        index = i
+                        break
+                    elif (name_1 == n3) and (name_3 == n1):
+                        found = True
+                        index = i
+                        break
+            if found and (arg.replace is True):
+                angles[index] = arg
+            elif found and (arg.new is True):
+                error_str = (f'Cannot add angle type {repr(arg)}, an angle '
+                             f' between {name_1}, {name_2}, and {name_3} '
+                             f'already exists')
+                raise ValueError(error_str)
+            elif (not found) and (arg.new is True):
+                angles.append(arg)
+            elif (not found) and (arg.replace is True):
+                error_str = (f'No existing angle between {name_1}, {name_2}, '
+                             f'and {name_3} was found to replace with '
+                             f'{repr(arg)}')
+                raise ValueError(error_str)
+    return angles
+
+
 def replace_in_fort3(input_file, output_path, *args):
     """Replace or add to an existing fort.3 file
 
@@ -317,9 +378,11 @@ def replace_in_fort3(input_file, output_path, *args):
         _parse_fort_3_file(input_file)
     )
     atom_name, atoms = _sort_new_replace_args_atom(atom_name, atoms, *args)
-    new_counts = _count_property_instances(*args)
-    existing_counts = _count_existing_instances(input_file)
-    total = {key: new_counts[key] + existing_counts[key]
-             for key in new_counts}
+    bonds = _sort_new_replace_args_bonds(atom_name, bonds, *args)
+
+    # new_counts = _count_property_instances(*args)
+    # existing_counts = _count_existing_instances(input_file)
+    # total = {key: new_counts[key] + existing_counts[key]
+    #          for key in new_counts}
 
     return output_path
