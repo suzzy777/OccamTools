@@ -9,7 +9,8 @@ from occamtools.replace_in_fort3 import (Fort3Replacement,
                                          _sort_new_replace_args_atom,
                                          _sort_new_replace_args_bonds,
                                          _sort_new_replace_args_angles,
-                                         _write_fort3_from_replace_objects)
+                                         _write_fort3_from_replace_objects,
+                                         replace_in_fort3)
 
 
 file_name = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
@@ -444,9 +445,15 @@ def test_replace_in_fort3_write_fort3_from_replace_objects():
     _write_fort3_from_replace_objects(atom_names, atoms, bonds, angles,
                                       torsions, non_bonds, scf, kappa, chi,
                                       out_path)
-    print('\n\n================================ FILE =================================')
-    with open(out_path, 'r') as in_file:
-        for line in in_file:
-            print(line, end='')
-    print('================================ FILE =================================\n\n')
+    # print('\n\n================================ FILE ======================')
+    # with open(out_path, 'r') as in_file:
+    #     for line in in_file:
+    #         print(line, end='')
+    # print('================================ FILE ======================\n\n')
     os.remove(out_path)
+
+
+def test_replace_in_fort3():
+    repl = Fort3Replacement(property='atom', new=True, content=['Ar', 1.67, 0])
+    out_file = replace_in_fort3(file_name, None, repl)
+    os.remove(out_file)

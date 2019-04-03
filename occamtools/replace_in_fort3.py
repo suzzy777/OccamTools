@@ -224,12 +224,12 @@ def _sort_new_replace_args_atom(atom_names_, atoms_, *args):
     atom_names = deepcopy(atom_names_)
     atoms = deepcopy(atoms_)
     for arg in args:
-        if len(arg._content) != 3:
-            error_str = (f'Invalid content for replacement object {repr(arg)},'
-                         f' the content kwarg must have length 3, not '
-                         f'{len(arg._content)}')
-            raise ValueError()
         if arg.property == _Properties.ATOM_TYPE:
+            if len(arg._content) != 3:
+                error_str = (f'Invalid content for replacement object '
+                             f'{repr(arg)}, the content kwarg must have length'
+                             f'3, not {len(arg._content)}')
+                raise ValueError()
             name = arg._content[0]
             found = False
             index = None
@@ -258,12 +258,12 @@ def _sort_new_replace_args_bonds(atom_names_, bonds_, *args):
     atom_names = deepcopy(atom_names_)
     bonds = deepcopy(bonds_)
     for arg in args:
-        if len(arg._content) != 4:
-            error_str = (f'Invalid content for replacement object {repr(arg)},'
-                         f' the content kwarg must have length 4, not '
-                         f'{len(arg._content)}')
-            raise ValueError()
         if arg.property == _Properties.BOND_TYPE:
+            if len(arg._content) != 4:
+                error_str = (f'Invalid content for replacement object '
+                             f'{repr(arg)}, the content kwarg must have length'
+                             f'4, not {len(arg._content)}')
+                raise ValueError()
             name_1, name_2 = arg._content[:2]
             if name_1 not in atom_names.values():
                 error_str = (f'Cannot establish bond type {repr(arg)}, '
@@ -304,12 +304,12 @@ def _sort_new_replace_args_angles(atom_names_, angles_, *args):
     atom_names = deepcopy(atom_names_)
     angles = deepcopy(angles_)
     for arg in args:
-        if len(arg._content) != 5:
-            error_str = (f'Invalid content for replacement object {repr(arg)},'
-                         f' the content kwarg must have length 4, not '
-                         f'{len(arg._content)}')
-            raise ValueError()
         if arg.property == _Properties.BOND_ANGLE:
+            if len(arg._content) != 5:
+                error_str = (f'Invalid content for replacement object '
+                             f'{repr(arg)}, the content kwarg must have length'
+                             f' 5, not {len(arg._content)}')
+                raise ValueError()
             name_1, name_2, name_3 = arg._content[:3]
             if name_1 not in atom_names.values():
                 error_str = (f'Cannot establish bond angle {repr(arg)}, '
@@ -360,7 +360,6 @@ def _write_fort3_from_replace_objects(atom_names, atoms, bonds, angles,
                                       torsions, non_bonds, scf, kappa, chi,
                                       file_path):
     atom_indices = {val: key for key, val in atom_names.items()}
-    print(atom_indices)
 
     with open(file_path, 'w') as out_file:
         out_file.write('******************* model file *******************\n')
@@ -436,15 +435,13 @@ def replace_in_fort3(input_file, output_path, *args):
                          ' replace flag set')
             raise ValueError(error_str)
 
-    atom_name, atoms, bonds, angles, torsions, non_bonds, scf, kappa, chi = (
+    atom_names, atoms, bonds, angles, torsions, non_bonds, scf, kappa, chi = (
         _parse_fort_3_file(input_file)
     )
-    atom_name, atoms = _sort_new_replace_args_atom(atom_name, atoms, *args)
-    bonds = _sort_new_replace_args_bonds(atom_name, bonds, *args)
-
-    # new_counts = _count_property_instances(*args)
-    # existing_counts = _count_existing_instances(input_file)
-    # total = {key: new_counts[key] + existing_counts[key]
-    #          for key in new_counts}
-
+    atom_names, atoms = _sort_new_replace_args_atom(atom_names, atoms, *args)
+    bonds = _sort_new_replace_args_bonds(atom_names, bonds, *args)
+    angles = _sort_new_replace_args_angles(atom_names, angles, *args)
+    _write_fort3_from_replace_objects(atom_names, atoms, bonds, angles,
+                                      torsions, non_bonds, scf, kappa, chi,
+                                      output_path)
     return output_path
