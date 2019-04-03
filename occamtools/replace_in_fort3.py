@@ -356,6 +356,68 @@ def _sort_new_replace_args_angles(atom_names_, angles_, *args):
     return angles
 
 
+def _write_fort3_from_replace_objects(atom_names, atoms, bonds, angles,
+                                      torsions, non_bonds, scf, kappa, chi,
+                                      file_path):
+    atom_indices = {val: key for key, val in atom_names.items()}
+    print(atom_indices)
+
+    with open(file_path, 'w') as out_file:
+        out_file.write('******************* model file *******************\n')
+        out_file.write(f'{len(atom_names)} different atom types\n')
+        out_file.write('*label   name      mass   charge\n')
+        for index in atom_names:
+            out_file.write(f'{index:>5} {atom_names[index]:>7} ')
+            for atom in atoms:
+                if atom._content[0] == atom_names[index]:
+                    mass = atom._content[1]
+                    charge = atom._content[2]
+                    out_file.write(f'{mass:>9.3f} {charge:>8.3f}\n')
+        out_file.write('**************************************************\n')
+        out_file.write(f'{len(bonds)} different bond types\n')
+        out_file.write('*atom1   atom2   bond_length   force_constant\n')
+        for bond in bonds:
+            name_1, name_2 = bond._content[:2]
+            i, j = atom_indices[name_1], atom_indices[name_2]
+            sigma, eps = bond._content[2:]
+            out_file.write(f'{i:>6} {j:>7} {sigma:>13.5f} {eps:>16.5f}\n')
+        out_file.write('**************************************************\n')
+        out_file.write(f'{len(angles)} different bond angles\n')
+        out_file.write('*atom1   atom2   atom3   theta0(deg)   force_constant\n')  # noqa: E501
+        for angle in angles:
+            name_1, name_2, name_3 = angle._content[:3]
+            i, j, k = (atom_indices[name_1], atom_indices[name_2],
+                       atom_indices[name_3])
+            theta, eps = angle._content[3:]
+            out_file.write(f'{i:>6} {j:>7} {k:>7} {theta:>13.5f} {eps:>16.5f}\n')  # noqa: E501
+        out_file.write('**************************************************\n')
+        out_file.write(f'{len(torsions)} different torsions\n')
+        out_file.write('*atom1   atom2    atom3   atom4         phi0   force_constant\n')  # noqa: E501
+        for torsion in torsions:
+            name_1, name_2, name_3, name_4 = torsion._content[:4]
+            a, b, c, d = (atom_indices[name_1], atom_indices[name_2],
+                          atom_indices[name_3], atom_indices[name_4])
+            phi, eps = torsion._content[4:]
+            out_file.write(f'{a:>6} {b:>7} {c:>7} {d:>7} {phi:>13.5f} {eps:>16.5f}\n')  # noqa: E501
+        out_file.write('**************************************************\n')
+        out_file.write(f'{len(non_bonds)} different non-bonded interactions\n')
+        out_file.write('*atom1   atom2   sigma   epsilon\n')
+        for nb in non_bonds:
+            name_1, name_2 = nb._content[:2]
+            i, j = atom_indices[name_1], atom_indices[name_2]
+            sigma, eps = nb._content[2:]
+            out_file.write(f'{i:>6} {j:>7} {sigma:>13.5f} {eps:>16.5f}\n')
+        out_file.write('****************** SCF settings ******************\n')
+        out_file.write('*   mx      my      mz  cells in  X Y Z directions\n')
+        out_file.write(f'{scf[0]:>6} {scf[1]:>7} {scf[2]:>7}\n')
+        out_file.write(f'* compressibility\n{kappa:>7.5f}\n')
+        out_file.write(f'*chi (Z={chi.shape[0]})\n')
+        for row in chi:
+            for n in row:
+                out_file.write(f'{n:>10.3f}')
+            out_file.write('\n')
+
+
 def replace_in_fort3(input_file, output_path, *args):
     """Replace or add to an existing fort.3 file
 
