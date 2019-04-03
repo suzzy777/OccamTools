@@ -219,34 +219,31 @@ def _parse_fort_3_file(fort_file):
                 kappa, chi)
 
 
-def _sort_new_replace_args(atom_name, atoms, bonds, angles, torsions,
-                           non_bonds, scf, kappa, chi, *args):
+def _sort_new_replace_args_atom(atom_name, atoms, *args):
     for arg in args:
         if arg.property == _Properties.ATOM_TYPE:
-            if arg.new is True:
-                atoms.append(arg)
-            elif arg.replace is True:
-                name = arg._content[0]
-                found = False
-                index = None
-                for i, atom in enumerate(atoms):
-                    if name == atom._content[0]:
-                        found = True
-                        index = i
-                        break
-                if found:
-                    atoms[i] = arg
-                else:
-                    error_str = (f'No existing atom with name {name} was '
-                                 f'found to replace with {repr(args)}')
-                    raise ValueError(error_str)
-            else:
-                error_str = (f'Property {repr(arg)} has neither the new or the'
-                             ' replace flag set')
+            name = arg._content[0]
+            found = False
+            index = None
+            for i, atom in enumerate(atoms):
+                if name == atom._content[0]:
+                    found = True
+                    index = i
+                    break
+            if found and (arg.replace is True):
+                atoms[index] = arg
+            elif found and (arg.new is True):
+                error_str = (f'Cannot add atom type {repr(arg)}, a type of '
+                             f'this name already exists')
                 raise ValueError(error_str)
-
-    return (atom_name, atoms, bonds, angles, torsions, non_bonds, scf, kappa,
-            chi)
+            elif (not found) and (arg.new is True):
+                atoms.append(arg)
+                atom_name[max(atom_name)+1] = arg._content[0]
+            elif (not found) and (arg.replace is True):
+                error_str = (f'No existing atom with name {name} was '
+                             f'found to replace with {repr(args)}')
+                raise ValueError(error_str)
+    return atom_name, atoms
 
 
 def replace_in_fort3(input_file, output_path, *args):
@@ -261,12 +258,16 @@ def replace_in_fort3(input_file, output_path, *args):
     if (output_path is None) or (output_path == ''):
         output_path = os.path.join(os.path.dirname(input_file),
                                    input_file + '_new')
+    for arg in args:
+        if (not arg.new) and (not arg.replace):
+            error_str = (f'Property {repr(arg)} has neither the new or the'
+                         ' replace flag set')
+            raise ValueError(error_str)
 
     atom_name, atoms, bonds, angles, torsions, non_bonds, scf, kappa, chi = (
         _parse_fort_3_file(input_file)
     )
-    _sort_new_replace_args(atom_name, atoms, bonds, angles, torsions,
-                           non_bonds, scf, kappa, chi, *args)
+    atom_name, atoms = _sort_new_replace_args_atom(atom_name, atoms, *args)
     new_counts = _count_property_instances(*args)
     existing_counts = _count_existing_instances(input_file)
     total = {key: new_counts[key] + existing_counts[key]
