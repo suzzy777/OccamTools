@@ -13,7 +13,8 @@ from occamtools.replace_in_fort3 import (Fort3Replacement,
                                          _sort_new_replace_args_angles,
                                          _write_fort3_from_replace_objects,
                                          replace_in_fort3,
-                                         _construct_new_chi)
+                                         _construct_new_chi,
+                                         _check_new_kappa)
 
 
 file_name = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
@@ -376,6 +377,47 @@ def test_replace_in_fort3_sort_new_replace_args_bonds():
         assert caught is True
 
 
+def test_replace_in_fort3_sort_new_replace_args_non_bonds():
+    # *label   name      mass   charge
+    #  1          O    15.999      0.0
+    #  2          H     1.008      0.0
+    #  3          Be    9.012      0.0
+    #  4          H+    1.007      1.0
+    #  2      different non-bonded interactions
+    # *atom1   atom2   sigma   epsilon
+    #      1       1     1.8     29.14
+    #      2       2     3.2      2.349
+
+    tol = 1e-14
+    atom_names, atoms, bonds, angles, torsions, non_bonds, scf, kappa, chi = (
+        _parse_fort_3_file(file_name)
+    )
+    repl = (
+        Fort3Replacement('non bond', replace=True, content=['O', 'O', 4, 2]),
+        Fort3Replacement('non bond', replace=True, content=['H', 'H', 7, 6]),
+        Fort3Replacement('non bond', new=True, content=['Be', 'H', 9.1, 3.6]),
+        Fort3Replacement('non bond', new=True, content=['H+', 'O', 9.4, 3.3]),
+    )
+    non_bonds_new = _sort_new_replace_args_bonds(atom_names, non_bonds, *repl,
+                                                 non_bond=True)
+    assert len(non_bonds_new) == 4
+    names = [('O', 'O'), ('H', 'H'), ('Be', 'H'), ('H+', 'O')]
+    lengths = [4.0, 7.0, 9.1, 9.4]
+    epsilons = [2.0, 6.0, 3.6, 3.3]
+    for name, length, eps in zip(names, lengths, epsilons):
+        found = False
+        n1, n2 = name
+
+        for non_bond in non_bonds_new:
+            name_1, name_2 = non_bond._content[:2]
+            if (((name_1 == n1) and (name_2 == n2)) or
+                    ((name_1 == n2) and (name_2 == n1))):
+                found = True
+                assert non_bond._content[2] == pytest.approx(length, abs=tol)
+                assert non_bond._content[3] == pytest.approx(eps, abs=tol)
+        assert found
+
+
 def test_replace_in_fort3_sort_new_replace_args_angles():
     tol = 1e-14
     atom_names, atoms, bonds, angles, torsions, non_bonds, scf, kappa, chi = (
@@ -488,6 +530,19 @@ def test_replace_in_fort3_write_fort3_from_replace_objects():
                                       torsions, non_bonds, scf, kappa, chi,
                                       atom_names, out_path)
     os.remove(out_path)
+
+
+def test_replace_in_fort3_check_new_kappa():
+    tol = 1e-14
+    current_kappa = 1.204
+    repl = Fort3Replacement(property='kappa', replace=True, content=[9.124423])
+    kappa = _check_new_kappa(current_kappa, repl)
+    assert kappa == pytest.approx(9.124423, abs=tol)
+
+    kappa = None
+    repl = Fort3Replacement(property='kappa', replace=True, content=0.159885)
+    kappa = _check_new_kappa(current_kappa, repl)
+    assert kappa == pytest.approx(0.159885, abs=tol)
 
 
 def test_replace_in_fort3():
