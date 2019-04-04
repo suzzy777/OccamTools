@@ -119,10 +119,9 @@ def test_replace_in_fort3_fort3_properties_index():
         assert caught
 
 
-"""
 def test_replace_in_fort3_file():
     replace_1 = Fort3Replacement(property='atom', new=True,
-                                 content=['H', '1.298', '0.0'])
+                                 content=['K', 1.298, 0.0])
     out_path = replace_in_fort3(file_name, None, replace_1)
     assert os.path.abspath(out_path) == os.path.abspath(file_name) + '_new'
     assert os.path.exists(out_path) and os.path.isfile(out_path)
@@ -133,7 +132,6 @@ def test_replace_in_fort3_file():
     assert os.path.abspath(out_file) == os.path.abspath(out_path)
     assert os.path.exists(out_path) and os.path.isfile(out_path)
     os.remove(out_path)
-"""
 
 
 def test_replace_in_fort3_count_property():
@@ -410,9 +408,7 @@ def test_replace_in_fort3_sort_new_replace_args_non_bonds():
 
 def test_replace_in_fort3_sort_new_replace_args_angles():
     tol = 1e-14
-    atom_names, atoms, bonds, angles, torsions, non_bonds, scf, kappa, chi = (
-        _parse_fort_3_file(file_name)
-    )
+    atom_names, _, _, angles, _, _, _, _, _ = _parse_fort_3_file(file_name)
     repl = (
         Fort3Replacement('angle', replace=True, content=['O', 'O', 'O', 4, 2]),
         Fort3Replacement('angle', replace=True, content=['O', 'H', 'O', 7, 6]),
