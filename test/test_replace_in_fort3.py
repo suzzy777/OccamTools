@@ -440,6 +440,23 @@ def test_replace_in_fort3_sort_new_replace_args_angles():
 
 
 def test_replace_in_fort3_construct_new_chi():
+    old_atom_names = {1: 'A', 2: 'B'}
+    new_atom_names = {1: 'A', 2: 'B'}
+    AA, AB = 1, 2
+    BA, BB = 3, 4
+    chi = np.array([[AA, AB],
+                    [BA, BB]])
+    expected = deepcopy(chi)
+    chi = _construct_new_chi(new_atom_names, old_atom_names, chi)
+    assert np.allclose(chi, expected)
+
+    old_atom_names = {0: 'A', 1: 'B'}
+    new_atom_names = {0: 'B', 1: 'A'}
+    chi = _construct_new_chi(new_atom_names, old_atom_names, chi)
+    expected = np.array([[BB, BA],
+                         [AB, AA]])
+    assert np.allclose(chi, expected)
+
     old_atom_names = {1: 'A', 2: 'B', 3: 'C', 4: 'D'}
     new_atom_names = {1: 'C', 2: 'B', 3: 'A', 4: 'E', 5: 'D'}
     AA, AB, AC, AD = 1, 2, 3, 4
@@ -489,25 +506,17 @@ def test_replace_in_fort3():
                          content=['O', 'H', 'O', 16, 1]),
     )
     out_file = replace_in_fort3(file_name, None, *repl)
-    '''
+
     with open(out_file, 'r') as in_file:
         lines = in_file.readlines()
-    """for line in lines:
-        print(line)"""
     atom_name, _, _, _, _, _, _, _, _ = _parse_fort_3_file(out_file)
     ind = {val: key for key, val in atom_name.items()}
-    expected = [f"{ind['Be']} Be 1.67 0.0",
+    expected = [f"{ind['Ar']} Ar 1.67 0.0",
                 f"{ind['O']} O 16.0 0.0",
                 f"{ind['Be']} {ind['Be']} 7.41 5.42",
                 f"{ind['H']} {ind['O']} 3.1 9.0",
                 f"{ind['H']} {ind['H']} {ind['H']} 84.1 5.9",
                 f"{ind['O']} {ind['H']} {ind['O']} 16.0 1.0"]
-
-    """print('\n')
-    for line in lines:
-        sline = line.split()
-        print(sline)
-    print('\n')"""
 
     for e in expected:
         found = False
@@ -535,8 +544,3 @@ def test_replace_in_fort3():
 
     if os.path.exists(out_file) and os.path.isfile(out_file):
         os.remove(out_file)
-    '''
-
-
-if __name__ == '__main__':
-    test_replace_in_fort3_construct_new_chi()
