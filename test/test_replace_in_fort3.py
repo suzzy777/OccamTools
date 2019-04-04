@@ -1,6 +1,8 @@
 import os
 import pytest
 import numpy as np
+from copy import deepcopy
+from test.test_occam_data import _check_equal
 from occamtools.replace_in_fort3 import (Fort3Replacement,
                                          _Properties, _is_int,
                                          _count_property_instances,
@@ -10,7 +12,8 @@ from occamtools.replace_in_fort3 import (Fort3Replacement,
                                          _sort_new_replace_args_bonds,
                                          _sort_new_replace_args_angles,
                                          _write_fort3_from_replace_objects,
-                                         replace_in_fort3)
+                                         replace_in_fort3,
+                                         _construct_new_chi)
 
 
 file_name = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
@@ -436,6 +439,28 @@ def test_replace_in_fort3_sort_new_replace_args_angles():
         assert caught is True
 
 
+def test_replace_in_fort3_construct_new_chi():
+    old_atom_names = {1: 'A', 2: 'B', 3: 'C', 4: 'D'}
+    new_atom_names = {1: 'C', 2: 'B', 3: 'A', 4: 'E', 5: 'D'}
+    AA, AB, AC, AD = 1, 2, 3, 4
+    BA, BB, BC, BD = 5, 6, 7, 8
+    CA, CB, CC, CD = 9, 10, 11, 12
+    DA, DB, DC, DD = 13, 14, 15, 16
+    chi = np.array([[AA, AB, AC, AD],
+                    [BA, BB, BC, BD],
+                    [CA, CB, CC, CD],
+                    [DA, DB, DC, DD]])
+    new_chi = _construct_new_chi(new_atom_names, old_atom_names, chi)
+    AE, BE, CE, DE, EE = 5*[-1]
+    EA, EB, EC, ED, EE = 5*[-1]
+    expected = np.array([[CC, CB, CA, CE, CD],
+                         [BC, BB, BA, BE, BD],
+                         [AC, AB, AA, AE, AD],
+                         [EC, EB, EA, EE, ED],
+                         [DC, DB, DA, DE, DD]])
+    assert np.allclose(new_chi, expected)
+
+
 def test_replace_in_fort3_write_fort3_from_replace_objects():
     atom_names, atoms, bonds, angles, torsions, non_bonds, scf, kappa, chi = (
         _parse_fort_3_file(file_name)
@@ -444,16 +469,74 @@ def test_replace_in_fort3_write_fort3_from_replace_objects():
                             'example_fort.3_out')
     _write_fort3_from_replace_objects(atom_names, atoms, bonds, angles,
                                       torsions, non_bonds, scf, kappa, chi,
-                                      out_path)
-    # print('\n\n================================ FILE ======================')
-    # with open(out_path, 'r') as in_file:
-    #     for line in in_file:
-    #         print(line, end='')
-    # print('================================ FILE ======================\n\n')
+                                      atom_names, out_path)
     os.remove(out_path)
 
 
 def test_replace_in_fort3():
-    repl = Fort3Replacement(property='atom', new=True, content=['Ar', 1.67, 0])
-    out_file = replace_in_fort3(file_name, None, repl)
-    os.remove(out_file)
+    repl = (
+        Fort3Replacement(property='atom', new=True, content=['Ar', 1.67, 0]),
+        Fort3Replacement(property='atom', replace=True, content=['O', 16, 0]),
+
+        Fort3Replacement(property='bond type', new=True,
+                         content=['Be', 'Be', 7.41, 5.42]),
+        Fort3Replacement(property='bond type', replace=True,
+                         content=['H', 'O', 3.1, 9]),
+
+        Fort3Replacement(property='angle', new=True,
+                         content=['H', 'H', 'H', 84.1, 5.9]),
+        Fort3Replacement(property='angle', replace=True,
+                         content=['O', 'H', 'O', 16, 1]),
+    )
+    out_file = replace_in_fort3(file_name, None, *repl)
+    '''
+    with open(out_file, 'r') as in_file:
+        lines = in_file.readlines()
+    """for line in lines:
+        print(line)"""
+    atom_name, _, _, _, _, _, _, _, _ = _parse_fort_3_file(out_file)
+    ind = {val: key for key, val in atom_name.items()}
+    expected = [f"{ind['Be']} Be 1.67 0.0",
+                f"{ind['O']} O 16.0 0.0",
+                f"{ind['Be']} {ind['Be']} 7.41 5.42",
+                f"{ind['H']} {ind['O']} 3.1 9.0",
+                f"{ind['H']} {ind['H']} {ind['H']} 84.1 5.9",
+                f"{ind['O']} {ind['H']} {ind['O']} 16.0 1.0"]
+
+    """print('\n')
+    for line in lines:
+        sline = line.split()
+        print(sline)
+    print('\n')"""
+
+    for e in expected:
+        found = False
+        se = e.split()
+        for line in lines:
+            sline = line.split()
+            if len(se) == len(sline):
+                equal = True
+                for a, b in zip(se, sline):
+                    equal = _check_equal(a, b) and equal
+                if equal is True:
+                    found = True
+                    break
+        if not found:
+            print(se)
+        assert found is True
+
+    caught = False
+    repl = Fort3Replacement(property='bond type', content=['H', 'H', 1, 1])
+    try:
+        out_file = replace_in_fort3(file_name, None, repl)
+    except ValueError:
+        caught = True
+    assert caught is True
+
+    if os.path.exists(out_file) and os.path.isfile(out_file):
+        os.remove(out_file)
+    '''
+
+
+if __name__ == '__main__':
+    test_replace_in_fort3_construct_new_chi()

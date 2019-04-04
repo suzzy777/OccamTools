@@ -47,7 +47,7 @@ def _assert_all_attributes_present(occam_data, fort1, fort7, xyz):
 
 def _check_equal(a, b):
     if _are_floats(a, b):
-        return a == pytest.approx(b, abs=1e-14)
+        return float(a) == pytest.approx(float(b), abs=1e-14)
     elif isinstance(a, str) and isinstance(b, str):
         return a == b
     elif hasattr(a, 'shape') and hasattr(b, 'shape'):

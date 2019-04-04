@@ -358,9 +358,8 @@ def _sort_new_replace_args_angles(atom_names_, angles_, *args):
 
 def _write_fort3_from_replace_objects(atom_names, atoms, bonds, angles,
                                       torsions, non_bonds, scf, kappa, chi,
-                                      file_path):
+                                      old_atom_names, file_path):
     atom_indices = {val: key for key, val in atom_names.items()}
-
     with open(file_path, 'w') as out_file:
         out_file.write('******************* model file *******************\n')
         out_file.write(f'{len(atom_names)} different atom types\n')
@@ -417,6 +416,37 @@ def _write_fort3_from_replace_objects(atom_names, atoms, bonds, angles,
             out_file.write('\n')
 
 
+def _construct_new_chi(atom_names_, old_atom_names_, chi):
+    if atom_names_ == old_atom_names_:
+        return chi
+
+    min_key = min(atom_names_.keys())
+    if min_key > 0:
+        atom_names = {key-min_key: val for key, val in atom_names_.items()}
+    else:
+        atom_names = deepcopy(atom_names_)
+
+    min_key = min(old_atom_names_.keys())
+    if min_key > 0:
+        old_atom_names = {key-min_key: val for key, val in
+                          old_atom_names_.items()}
+    else:
+        old_atom_names = deepcopy(old_atom_names_)
+
+    old_to_new = {}
+    key_list, val_list = list(atom_names.keys()), list(atom_names.values())
+    for key, val in old_atom_names.items():
+        old_to_new[key] = key_list[val_list.index(val)]
+
+    n = len(atom_names)
+    new_chi = np.ones(shape=(n, n)) * (-1)
+    for (i, j), element in np.ndenumerate(chi):
+        new_i, new_j = old_to_new[i], old_to_new[j]
+        new_chi[new_i, new_j] = element
+
+    return new_chi
+
+
 def replace_in_fort3(input_file, output_path, *args):
     """Replace or add to an existing fort.3 file
 
@@ -438,10 +468,12 @@ def replace_in_fort3(input_file, output_path, *args):
     atom_names, atoms, bonds, angles, torsions, non_bonds, scf, kappa, chi = (
         _parse_fort_3_file(input_file)
     )
+    old_atom_names = deepcopy(atom_names)
     atom_names, atoms = _sort_new_replace_args_atom(atom_names, atoms, *args)
     bonds = _sort_new_replace_args_bonds(atom_names, bonds, *args)
     angles = _sort_new_replace_args_angles(atom_names, angles, *args)
+    chi = _construct_new_chi(atom_names, old_atom_names, chi)
     _write_fort3_from_replace_objects(atom_names, atoms, bonds, angles,
                                       torsions, non_bonds, scf, kappa, chi,
-                                      output_path)
+                                      old_atom_names, output_path)
     return output_path
