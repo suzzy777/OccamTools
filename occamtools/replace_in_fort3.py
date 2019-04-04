@@ -254,11 +254,12 @@ def _sort_new_replace_args_atom(atom_names_, atoms_, *args):
     return atom_names, atoms
 
 
-def _sort_new_replace_args_bonds(atom_names_, bonds_, *args):
+def _sort_new_replace_args_bonds(atom_names_, bonds_, *args, non_bond=False):
     atom_names = deepcopy(atom_names_)
     bonds = deepcopy(bonds_)
+    check_prop = _Properties.NON_BONDED if non_bond else _Properties.BOND_TYPE
     for arg in args:
-        if arg.property == _Properties.BOND_TYPE:
+        if arg.property == check_prop:
             if len(arg._content) != 4:
                 error_str = (f'Invalid content for replacement object '
                              f'{repr(arg)}, the content kwarg must have length'
@@ -485,8 +486,10 @@ def replace_in_fort3(input_file, output_path, *args):
     atom_names, atoms = _sort_new_replace_args_atom(atom_names, atoms, *args)
     bonds = _sort_new_replace_args_bonds(atom_names, bonds, *args)
     angles = _sort_new_replace_args_angles(atom_names, angles, *args)
-    chi = _construct_new_chi(atom_names, old_atom_names, chi)
+    non_bonds = _sort_new_replace_args_bonds(atom_names, non_bonds, *args,
+                                             non_bond=True)
     kappa = _check_new_kappa(kappa, *args)
+    chi = _construct_new_chi(atom_names, old_atom_names, chi)
     _write_fort3_from_replace_objects(atom_names, atoms, bonds, angles,
                                       torsions, non_bonds, scf, kappa, chi,
                                       old_atom_names, output_path)
