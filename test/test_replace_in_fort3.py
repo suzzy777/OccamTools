@@ -285,9 +285,8 @@ def test_replace_in_fort3_parse_fort_3_file():
 
 def test_replace_in_fort3_sort_new_replace_args_atoms():
     tol = 1e-14
-    atom_names, atoms, bonds, angles, torsions, non_bonds, scf, kappa, chi = (
-        _parse_fort_3_file(file_name)
-    )
+    atom_names, atoms, _, _, _, _, _, _, _ = _parse_fort_3_file(file_name)
+
     repl = (
         Fort3Replacement('atom', new=True, content=['P', 30.973, 0.0]),
         Fort3Replacement('atom', replace=True, content=['O', 16.000, 0.0]),
@@ -323,9 +322,7 @@ def test_replace_in_fort3_sort_new_replace_args_atoms():
 
 def test_replace_in_fort3_sort_new_replace_args_bonds():
     tol = 1e-14
-    atom_names, atoms, bonds, angles, torsions, non_bonds, scf, kappa, chi = (
-        _parse_fort_3_file(file_name)
-    )
+    atom_names, _, bonds, _, _, _, _, _, _ = _parse_fort_3_file(file_name)
     repl = (
         Fort3Replacement('bond type', replace=True, content=['H', 'O', 4, 2]),
         Fort3Replacement('bond type', replace=True, content=['H+', 'H', 7, 6]),
@@ -377,9 +374,7 @@ def test_replace_in_fort3_sort_new_replace_args_bonds():
 
 def test_replace_in_fort3_sort_new_replace_args_non_bonds():
     tol = 1e-14
-    atom_names, atoms, bonds, angles, torsions, non_bonds, scf, kappa, chi = (
-        _parse_fort_3_file(file_name)
-    )
+    atom_names, _, _, _, _, non_bonds, _, _, _ = _parse_fort_3_file(file_name)
     repl = (
         Fort3Replacement('non bond', replace=True, content=['O', 'O', 4, 2]),
         Fort3Replacement('non bond', replace=True, content=['H', 'H', 7, 6]),
