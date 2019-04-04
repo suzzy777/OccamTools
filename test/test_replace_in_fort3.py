@@ -378,16 +378,6 @@ def test_replace_in_fort3_sort_new_replace_args_bonds():
 
 
 def test_replace_in_fort3_sort_new_replace_args_non_bonds():
-    # *label   name      mass   charge
-    #  1          O    15.999      0.0
-    #  2          H     1.008      0.0
-    #  3          Be    9.012      0.0
-    #  4          H+    1.007      1.0
-    #  2      different non-bonded interactions
-    # *atom1   atom2   sigma   epsilon
-    #      1       1     1.8     29.14
-    #      2       2     3.2      2.349
-
     tol = 1e-14
     atom_names, atoms, bonds, angles, torsions, non_bonds, scf, kappa, chi = (
         _parse_fort_3_file(file_name)
