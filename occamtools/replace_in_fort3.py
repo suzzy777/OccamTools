@@ -75,8 +75,8 @@ class Fort3Replacement:
         self._replace = replace
         self._new = not replace
 
-    def _parse_property_name(self, property):
-        p = property.lower()
+    def _parse_property_name(self, prop):
+        p = prop.lower()
         if 'atom' in p:
             self.property = _Properties.ATOM_TYPE
         elif 'bond' in p and 'type' in p:
@@ -94,7 +94,7 @@ class Fort3Replacement:
         elif 'chi' in p:
             self.property = _Properties.CHI
         else:
-            error_string = ('Property string ' + property + ' was not'
+            error_string = ('Property string ' + str(property) + ' was not'
                             ' recognized')
             raise ValueError(error_string)
 
