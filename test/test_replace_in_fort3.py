@@ -13,7 +13,8 @@ from occamtools.replace_in_fort3 import (Fort3Replacement,
                                          _sort_new_replace_args_angles,
                                          _write_fort3_from_replace_objects,
                                          replace_in_fort3,
-                                         _construct_new_chi)
+                                         _construct_new_chi,
+                                         _check_new_kappa)
 
 
 file_name = os.path.join(os.path.dirname(__file__), os.pardir, 'data',
@@ -488,6 +489,19 @@ def test_replace_in_fort3_write_fort3_from_replace_objects():
                                       torsions, non_bonds, scf, kappa, chi,
                                       atom_names, out_path)
     os.remove(out_path)
+
+
+def test_replace_in_fort3_check_new_kappa():
+    tol = 1e-14
+    current_kappa = 1.204
+    repl = Fort3Replacement(property='kappa', replace=True, content=[9.124423])
+    kappa = _check_new_kappa(current_kappa, repl)
+    assert kappa == pytest.approx(9.124423, abs=tol)
+
+    kappa = None
+    repl = Fort3Replacement(property='kappa', replace=True, content=0.159885)
+    kappa = _check_new_kappa(current_kappa, repl)
+    assert kappa == pytest.approx(0.159885, abs=tol)
 
 
 def test_replace_in_fort3():

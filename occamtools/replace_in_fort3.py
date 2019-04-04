@@ -89,7 +89,7 @@ class Fort3Replacement:
             self.property = _Properties.NON_BONDED
         elif 'scf' in p or 'hpf' in p:
             self.property = _Properties.SCF
-        elif 'comp' in p:
+        elif 'comp' in p or 'kappa' in p:
             self.property = _Properties.COMPRESSIBILITY
         elif 'chi' in p:
             self.property = _Properties.CHI
@@ -356,6 +356,19 @@ def _sort_new_replace_args_angles(atom_names_, angles_, *args):
     return angles
 
 
+def _check_new_kappa(kappa_, *args):
+    kappa = deepcopy(kappa_)
+    for arg in args:
+        if arg.property == _Properties.COMPRESSIBILITY:
+            content = arg._content
+            if (isinstance(content, list) or isinstance(content, tuple)
+                    or hasattr(content, 'shape')):
+                content = content[0]
+            kappa = content
+            break
+    return kappa
+
+
 def _write_fort3_from_replace_objects(atom_names, atoms, bonds, angles,
                                       torsions, non_bonds, scf, kappa, chi,
                                       old_atom_names, file_path):
@@ -473,6 +486,7 @@ def replace_in_fort3(input_file, output_path, *args):
     bonds = _sort_new_replace_args_bonds(atom_names, bonds, *args)
     angles = _sort_new_replace_args_angles(atom_names, angles, *args)
     chi = _construct_new_chi(atom_names, old_atom_names, chi)
+    kappa = _check_new_kappa(kappa, *args)
     _write_fort3_from_replace_objects(atom_names, atoms, bonds, angles,
                                       torsions, non_bonds, scf, kappa, chi,
                                       old_atom_names, output_path)
