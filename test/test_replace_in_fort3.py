@@ -530,8 +530,6 @@ def test_replace_in_fort3():
                 if equal is True:
                     found = True
                     break
-        if not found:
-            print(se)
         assert found is True
 
     caught = False
