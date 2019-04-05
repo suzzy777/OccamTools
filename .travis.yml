@@ -11,7 +11,7 @@ install:
   - pip3 install codecov
   - pip3 install codacy-coverage
   - pip3 install -e .
-scipt:
+script:
   - pytest -v -s --cov=./
 after_success:
   - codecov -t $CODECOV_PROJECT_TOKEN
