@@ -1,10 +1,10 @@
-OccamTools 
+OccamTools
 &middot;
 [![Build Status](https://travis-ci.com/mortele/OccamTools.svg?token=81VUNKkUYjZSicZzs1NR&branch=master)](https://travis-ci.com/mortele/OccamTools) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b91377a289bc42868314310dd6be2b60)](https://www.codacy.com?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mortele/OccamTools&amp;utm_campaign=Badge_Grade) [![codecov](https://codecov.io/gh/mortele/OccamTools/branch/master/graph/badge.svg?token=IXlriBpSwo)](https://codecov.io/gh/mortele/OccamTools) [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![PyPI version](https://badge.fury.io/py/occamtools.svg)](https://badge.fury.io/py/occamtools)
 =========
 Analysis and synthesis tools for [OCCAM](#OCCAM) molecular dynamics/hybrid particle-field simulations.
 
-Input to [OCCAM](#OCCAM) consists mainly of three file types; `fort.1` (simulation metadata), `fort.3` (particle and bond parameters), and `fort.5` (positions and bond structure). The output from the run is a `fort.8` file, adhering to the [`.xyz`](https://en.wikipedia.org/wiki/XYZ_file_format) file format. The `occamtools` python package provides a reader for these file formats (both input and output) and generates a single object containing all the information about the simulation, making analysis of simulation runs and comparison between runs easier. 
+Input to [OCCAM](#OCCAM) consists mainly of three file types; `fort.1` (simulation metadata), `fort.3` (particle and bond parameters), and `fort.5` (positions and bond structure). The output from the run is a `fort.8` file, adhering to the [`.xyz`](https://en.wikipedia.org/wiki/XYZ_file_format) file format. The `occamtools` python package provides a reader for these file formats (both input and output) and generates a single object containing all the information about the simulation, making analysis of simulation runs and comparison between runs easier.
 
 Installation
 ---------
@@ -24,8 +24,8 @@ from occamtools import OccamData
 
 data = OccamData('your/file/or/directory/here')
 ```
-where the `data` object now holds all information about the simulation run, e.g. print what kinds of particles a simulation consists of 
-```python 
+where the `data` object now holds all information about the simulation run, e.g. print what kinds of particles a simulation consists of
+```python
 print('Simulation consists of...')
 for type_name in data.type_dict:
     num_type = sum(data.type == data.type_dict[type_name])
@@ -88,3 +88,13 @@ OCCAM
 OCCAM is a program for Molecular Dynamics Simulations able to perform Hybrid Particle-Field (PF) Theoretical Molecular Dynamics simulations. This recent PF technique combines molecular dynamics (MD) and self consistent field theory (SCF). [Read more.](http://www.occammd.org/about/)
 
 [![occam-website](http://www.occammd.org/wp-content/uploads/2018/08/cropped-Untitled-2-01-2.png)](http://www.occammd.org/)
+
+
+Changelog
+---------
+**0.2.4**: Add functionality for reading `.xyz` files with additional velocity information, as output by OCCAM when the `velocity_traj` flag is set in `fort.1`. <br>
+**0.2.3**: Code clean-up. <br>
+**0.2.2**: Extend `repace_in_fort3` to allow for changing compressibility and non-bonded interactions. Fix a bug causing new particle types added to break the chi matrix when writing `fort.3` files. <br>
+**0.2.1**: Update the `__all__` variable of `__init__.py` to reflect newly added classes and methods. <br>
+**0.2.0**: Add functionality for editing `fort.3` files (in-place or creating new ones). <br>
+**0.1.0**: Add functionality for editing `fort.1` files (in-place or creating new ones). <br>
