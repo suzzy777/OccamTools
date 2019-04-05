@@ -3,10 +3,6 @@ dist: xenial
 language: python
 cache: pip
 
-python:
-  - 3.6.6
-  - 3.7.0
-
 stages:
   - test
   - name: deploy
@@ -14,20 +10,21 @@ stages:
 
 jobs:
   include:
+    - python: 3.6.6
+    - python: 3.7.0
     - stage: test
-      install:
+      - install:
         - pip3 install codecov
         - pip3 install codacy-coverage
         - pip3 install -e .
-      script:
+      - script:
         - pytest -v -s --cov=./
-      after_success:
+      - after_success:
         - codecov -t $CODECOV_PROJECT_TOKEN
         - coverage xml
         - python-codacy-coverage -r coverage.xml
-
     - stage: deploy
-      script:
+      - script:
         - echo Deploying to PyPI
 
 deploy:
