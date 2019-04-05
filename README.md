@@ -83,6 +83,22 @@ print(plot(kinetic_energy_deviations.tolist()))
 Behind the scenes, `.npy` (for numpy arrays) and `.json` (for anything else) files are used to represent the simulation data. By default, loading a simulation run causes the saving of small (relative to the original `fort.5/7/8`) binary files containing the data. These are used to load from on subsequent calls. This means calls to `OccamData.load('your/file/here')` of `OccamData('your/file/here')` will be significantly faster *after* the first call. In this specific example, a 25x speedup is achieved (but your mileage may vary).
 ![load example](https://i.imgur.com/Wssbx9B.gif)
 
+Running tests with `tox`
+---------
+Assuming python `3.7` is already installed, install a separate `3.6.6` instance using `pyenv` by
+```bash
+> brew install pyenv
+> pyenv install 3.6.6
+```
+and then inside the `occamtools` directory do
+```bash
+> git clone git@github.com:mortele/OccamTools.git occamtools
+> cd occamtools
+> pyenv local 3.6.6
+> tox
+```
+which will run unit tests (using `pytest`) with python versions `3.6.6` and the default `3.7`.
+
 OCCAM
 ---------
 OCCAM is a program for Molecular Dynamics Simulations able to perform Hybrid Particle-Field (PF) Theoretical Molecular Dynamics simulations. This recent PF technique combines molecular dynamics (MD) and self consistent field theory (SCF). [Read more.](http://www.occammd.org/about/)
@@ -91,6 +107,8 @@ OCCAM is a program for Molecular Dynamics Simulations able to perform Hybrid Par
 
 Changelog
 ---------
+**0.2.6**: Add proper testing for python `3.6` and `3.7` using [`tox`](https://pypi.org/project/tox/). <br>
+**0.2.5**: Change python version required to `>=3.6` (from `>=3.7`). <br>
 **0.2.4**: Add functionality for reading `.xyz` files with additional velocity information, as output by OCCAM when the `velocity_traj` flag is set in `fort.1`. <br>
 **0.2.3**: Code clean-up. <br>
 **0.2.2**: Extend `repace_in_fort3` to allow for changing compressibility and non-bonded interactions. Fix a bug causing new particle types added to break the chi matrix when writing `fort.3` files. <br>
