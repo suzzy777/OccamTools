@@ -89,7 +89,6 @@ OCCAM is a program for Molecular Dynamics Simulations able to perform Hybrid Par
 
 [![occam-website](http://www.occammd.org/wp-content/uploads/2018/08/cropped-Untitled-2-01-2.png)](http://www.occammd.org/)
 
-
 Changelog
 ---------
 **0.2.4**: Add functionality for reading `.xyz` files with additional velocity information, as output by OCCAM when the `velocity_traj` flag is set in `fort.1`. <br>
