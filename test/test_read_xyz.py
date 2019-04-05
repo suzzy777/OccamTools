@@ -111,3 +111,16 @@ def test_are_floats():
     assert not _are_floats(1, 5.6, '52.1', '8', 'askgj')
     assert not _are_floats(2.1, 3.8, None)
     assert not _are_floats('box:', '125.0', '25.0', '25.0')
+
+
+def test_read_xyz_velocities():
+    file_name_velocities = os.path.join(os.path.dirname(file_name),
+                                        'example_velocities_fort.8')
+    xyz = Xyz(file_name_velocities)
+    xyz.read_file(silent=True)
+    assert hasattr(xyz, 'vx')
+    assert hasattr(xyz, 'vy')
+    assert hasattr(xyz, 'vz')
+    assert xyz.vx.shape == xyz.x.shape
+    assert xyz.vy.shape == xyz.y.shape
+    assert xyz.vz.shape == xyz.z.shape

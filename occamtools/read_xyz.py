@@ -7,7 +7,7 @@ def _are_floats(*args):
     are_floats = True
     try:
         for f in args:
-            _ = float(f)
+            float(f)
     except TypeError:
         are_floats = False
     except ValueError:
@@ -18,6 +18,7 @@ def _are_floats(*args):
 class Xyz:
     def __init__(self, file_name):
         self.file_name = file_name
+        self.velocities = False
 
     def _allocate_arrays(self):
         self.type = np.zeros(self.n_particles)
@@ -25,6 +26,10 @@ class Xyz:
         self.x = np.zeros(shape=(self.n_time_steps_, self.n_particles))
         self.y = np.zeros(shape=(self.n_time_steps_, self.n_particles))
         self.z = np.zeros(shape=(self.n_time_steps_, self.n_particles))
+        if self.velocities:
+            self.vx = np.zeros(shape=(self.n_time_steps_, self.n_particles))
+            self.vy = np.zeros(shape=(self.n_time_steps_, self.n_particles))
+            self.vz = np.zeros(shape=(self.n_time_steps_, self.n_particles))
 
     def _parse_comment_first(self, line):
         line = line.split()
@@ -72,6 +77,12 @@ class Xyz:
             self.num_lines = sum(1 for line in in_file)
 
         with open(self.file_name, 'r') as in_file:
+            for _ in range(3):
+                line = in_file.readline()
+            if len(line.split()) == 7:
+                self.velocities = True
+            in_file.seek(0)
+
             self.n_particles = int(in_file.readline())
             self.n_time_steps_ = self.num_lines // self.n_particles
             self._allocate_arrays()
@@ -95,3 +106,8 @@ class Xyz:
                     self.x[time_step, i] = float(line[1])
                     self.y[time_step, i] = float(line[2])
                     self.z[time_step, i] = float(line[3])
+
+                    if self.velocities:
+                        self.vx[time_step, i] = float(line[4])
+                        self.vy[time_step, i] = float(line[5])
+                        self.vz[time_step, i] = float(line[6])
