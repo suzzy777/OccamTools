@@ -2,19 +2,34 @@ sudo: false
 dist: xenial
 language: python
 cache: pip
+
 python:
   - 3.6.6
   - 3.7.0
-install:
-  - pip3 install codecov
-  - pip3 install codacy-coverage
-  - pip3 install -e .
-script:
-  - pytest -v --cov=./
-after_success:
-  - codecov -t $CODECOV_PROJECT_TOKEN
-  - coverage xml
-  - python-codacy-coverage -r coverage.xml
+
+stages:
+  - test
+  - name: deploy
+    if: tag IS present
+
+jobs:
+  include:
+    - stage: test
+      install:
+        - pip3 install codecov
+        - pip3 install codacy-coverage
+        - pip3 install -e .
+      script:
+        - pytest -v -s --cov=./
+      after_success:
+        - codecov -t $CODECOV_PROJECT_TOKEN
+        - coverage xml
+        - python-codacy-coverage -r coverage.xml
+
+    - stage: deploy
+      script:
+        - echo Deploying to PyPI
+
 deploy:
   provider: pypi
   user: mortele
