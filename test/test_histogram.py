@@ -60,6 +60,18 @@ def test_histogram_time_steps():
         assert ts[0] == 0
         assert ts[1] == len(d)-1
 
+    for time_step in ((-5, -2), (1, -3), (-11, 4)):
+        ts = _check_time_steps(d, time_step)
+        print(time_step, ts)
+        if time_step[0] < 0:
+            assert ts[0] == len(d) + time_step[0]
+        else:
+            assert ts[0] == time_step[0]
+        if time_step[1] < 0:
+            assert ts[1] == len(d) + time_step[1]
+        else:
+            assert ts[1] == time_step[1]
+
     for time_steps in ('here be dragons', (1, 200)):
         caught = False
         try:
