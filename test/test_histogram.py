@@ -62,7 +62,6 @@ def test_histogram_time_steps():
 
     for time_step in ((-5, -2), (1, -3), (-11, 4)):
         ts = _check_time_steps(d, time_step)
-        print(time_step, ts)
         if time_step[0] < 0:
             assert ts[0] == len(d) + time_step[0]
         else:
@@ -79,3 +78,19 @@ def test_histogram_time_steps():
         except ValueError:
             caught = True
         assert caught is True
+
+
+def test_histogram_values():
+    x = np.array([[0, 1, 2, 3, 4],
+                  [2, 3, 3, 4, 4],
+                  [1, 1, 1, 4, 1]], dtype=np.float64)
+    x = x + 0.5
+    hist, bins = occamhist(x, bins=5, time_steps=(0, 0), range=(0, 5))
+    assert np.allclose(hist, np.array([1, 1, 1, 1, 1]))
+    hist, bins = occamhist(x, bins=5, time_steps=(1, 1), range=(0, 5))
+    assert np.allclose(hist, np.array([0, 0, 1, 2, 2]))
+    hist, bins = occamhist(x, bins=5, time_steps=(2, 2), range=(0, 5))
+    assert np.allclose(hist, np.array([0, 4, 0, 0, 1]))
+
+    hist, bins = occamhist(x, bins=5, range=(0, 5))
+    assert np.allclose(hist, np.array([1, 5, 2, 3, 4]))
