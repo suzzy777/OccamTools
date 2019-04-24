@@ -71,3 +71,5 @@ def test_read_fort1_file_contents():
     assert isinstance(fort1.angle_function, int)
     assert isinstance(fort1.temperature_coupl, float)
     assert isinstance(fort1.velocity_read, bool)
+    assert isinstance(fort1.velocity_traj, bool)
+    assert fort1.velocity_traj is False
