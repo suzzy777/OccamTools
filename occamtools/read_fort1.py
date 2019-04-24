@@ -54,6 +54,10 @@ class Fort1:
             self.target_pressure = float(self.file_contents[index+1].strip())
         elif 'pressure_coupling' in line:
             self.pressure_coupling = float(self.file_contents[index+1].strip())
+        elif 'velocity_traj' in line:
+            self.velocity_traj = _parse_bool(
+                self.file_contents[index+1].strip()
+            )
         elif 'velocity_read' in line:
             self.velocity_read = _parse_bool(
                 self.file_contents[index+1].strip()
