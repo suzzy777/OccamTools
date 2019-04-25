@@ -5,27 +5,30 @@ cache: pip
 
 env:
   global:
-    - GENERATE_COV: false
+    - COV=false
+
 matrix:
   include:
     - python: 3.6
     - python: 3.7
-      env: GENERATE_COV=true
+      env: COV=true
     #- python: 3.8-dev
 
 install:
-  - if [ "$GENERATE_COV" ]; then pip3 install codecov; fi
-  - if [ "$GENERATE_COV" ]; then pip3 install codacy-coverage; fi
+  - if [ $COV == 'true' ]; then pip3 install codecov; fi
+  - if [ $COV == 'true' ]; then pip3 install codacy-coverage; fi
   - pip3 install -e .
 
 script:
-  - if [ "$GENERATE_COV" ]; then pytest -v -s --cov=./; fi
-  - if [ not "$GENERATE_COV" ]; then pytest -v -s; fi
+  - if [ $COV == 'true' ];
+    then pytest -v -s --cov=./;
+    else pytest -v -s;
+    fi
 
 after_success:
-  - if [ "$GENERATE_COV" ]; then codecov -t $CODECOV_PROJECT_TOKEN; fi
-  - if [ "$GENERATE_COV" ]; then coverage xml; fi
-  - if [ "$GENERATE_COV" ]; then python-codacy-coverage -r coverage.xml; fi
+  - if [ $COV == 'true' ]; then codecov -t $CODECOV_PROJECT_TOKEN; fi
+  - if [ $COV == 'true' ]; then coverage xml; fi
+  - if [ $COV == 'true' ]; then python-codacy-coverage -r coverage.xml; fi
 
 deploy:
   provider: pypi
