@@ -96,6 +96,7 @@ and then inside the `occamtools` directory do
 > git clone git@github.com:mortele/OccamTools.git occamtools
 > cd occamtools
 > pyenv local 3.6.6 3.8-dev
+> pip3 install tox-pyenv
 > tox
 ```
 which will run unit tests (using `pytest`) with python versions `3.6`, `3.7`, and the `3.8` development build.
@@ -108,7 +109,7 @@ OCCAM is a program for Molecular Dynamics Simulations able to perform Hybrid Par
 
 Changelog
 ---------
-**0.3.2**: Update docs. <br>
+**0.3.2**: Add testing with python alpha version `3.8-dev`, stream line travis integration and coverage reporting. <br>
 **0.3.1**: Move the `bins` keyword argument to `histogram` from an explicit argument to `**kwargs` handled by `np.histogram`. <br>
 **0.3.0**: Add histogram computation capabilities. <br>
 **0.2.7**: Add the `velocity_traj` flag to `fort1` file reader. <br>
