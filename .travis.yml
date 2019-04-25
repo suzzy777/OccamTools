@@ -9,25 +9,23 @@ matrix:
     - python: 3.7
     - python: 3.8-dev
 
-install:
-  - pip3 install codecov
-  - pip3 install codacy-coverage
-  - pip3 install -e .
-script:
-  - pytest -v -s --cov=./
-after_success:
-  - codecov -t $CODECOV_PROJECT_TOKEN
-  - coverage xml
-  - python-codacy-coverage -r coverage.xml
+  install:
+    - pip3 install codecov
+    - pip3 install codacy-coverage
+    - pip3 install -e .
 
-jobs:
-  include:
-    - stage: deploy to PyPI
-      script: echo "Deploying to PyPI"
-      deploy:
-        provider: pypi
-        user: mortele
-        password: $PYPI_PASSWORD
-        on:
-          tags: true
-          python: 3.7
+  script:
+    - pytest -v -s --cov=./
+
+  after_success:
+    - codecov -t $CODECOV_PROJECT_TOKEN
+    - coverage xml
+    - python-codacy-coverage -r coverage.xml
+
+  deploy:
+    provider: pypi
+    user: mortele
+    password: $PYPI_PASSWORD
+    on:
+      tags: true
+      python: 3.7
