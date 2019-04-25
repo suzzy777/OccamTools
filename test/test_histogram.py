@@ -85,12 +85,12 @@ def test_histogram_values():
                   [2, 3, 3, 4, 4],
                   [1, 1, 1, 4, 1]], dtype=np.float64)
     x = x + 0.5
-    hist, bins = occamhist(x, bins=5, time_steps=(0, 0), range=(0, 5))
+    hist, _ = occamhist(x, bins=5, time_steps=(0, 0), range=(0, 5))
     assert np.allclose(hist, np.array([1, 1, 1, 1, 1]))
-    hist, bins = occamhist(x, bins=5, time_steps=(1, 1), range=(0, 5))
+    hist, _ = occamhist(x, bins=5, time_steps=(1, 1), range=(0, 5))
     assert np.allclose(hist, np.array([0, 0, 1, 2, 2]))
-    hist, bins = occamhist(x, bins=5, time_steps=(2, 2), range=(0, 5))
+    hist, _ = occamhist(x, bins=5, time_steps=(2, 2), range=(0, 5))
     assert np.allclose(hist, np.array([0, 4, 0, 0, 1]))
 
-    hist, bins = occamhist(x, bins=5, range=(0, 5))
+    hist, _ = occamhist(x, bins=5, range=(0, 5))
     assert np.allclose(hist, np.array([1, 5, 2, 3, 4]))
