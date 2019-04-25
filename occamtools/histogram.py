@@ -45,7 +45,7 @@ def _check_time_steps(data, time_steps):
     raise ValueError(error_str)
 
 
-def histogram(data, bins=50, dimension=None, time_steps=None, **kwargs):
+def histogram(data, dimension=None, time_steps=None, **kwargs):
     if isinstance(data, OccamData):
         dim = _check_dimension(dimension)
         if dim == 0:
@@ -67,8 +67,8 @@ def histogram(data, bins=50, dimension=None, time_steps=None, **kwargs):
         raise TypeError(error_str)
 
     time_steps = _check_time_steps(d, time_steps)
-    hist, bins = np.histogram(d[time_steps[0], :], bins=bins, **kwargs)
+    hist, bins = np.histogram(d[time_steps[0], :], **kwargs)
     for step in range(time_steps[0]+1, time_steps[1]):
-        hist_, _ = np.histogram(d[step, :], bins=bins, **kwargs)
+        hist_, _ = np.histogram(d[step, :], **kwargs)
         hist = hist + hist_
     return hist, bins
