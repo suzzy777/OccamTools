@@ -85,20 +85,20 @@ Behind the scenes, `.npy` (for numpy arrays) and `.json` (for anything else) fil
 
 Running tests with `tox`
 ---------
-Assuming python `3.7` is already installed, install a separate `3.6.6` instance using `pyenv` by
+Assuming python `3.7` is already installed, install separate `3.6` and `3.8` instances using `pyenv` by
 ```bash
 > brew install pyenv
 > pyenv install 3.6.6
+> pyenv install 3.8-dev
 ```
 and then inside the `occamtools` directory do
 ```bash
 > git clone git@github.com:mortele/OccamTools.git occamtools
 > cd occamtools
-> pyenv local 3.6.6
-> pip3 install tox-pyenv
+> pyenv local 3.6.6 3.8-dev
 > tox
 ```
-which will run unit tests (using `pytest`) with python versions `3.6.6` and the default `3.7`.
+which will run unit tests (using `pytest`) with python versions `3.6`, `3.7`, and the `3.8` development build.
 
 OCCAM
 ---------

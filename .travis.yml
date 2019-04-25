@@ -1,31 +1,39 @@
 sudo: false
 dist: xenial
 language: python
-cache: pip
 
-python:
-  - 3.6.6
-  - 3.7.0
+env:
+  global:
+    - COV=false
+
+matrix:
+  include:
+    - python: 3.6
+    - python: 3.7
+      env: COV=true
+    - python: 3.8-dev
 
 install:
-  - pip3 install codecov
-  - pip3 install codacy-coverage
+  - if [ $COV == 'true' ]; then pip3 install codecov; fi
+  - if [ $COV == 'true' ]; then pip3 install codacy-coverage; fi
   - pip3 install -e .
-script:
-  - pytest -v -s --cov=./
-after_success:
-  - codecov -t $CODECOV_PROJECT_TOKEN
-  - coverage xml
-  - python-codacy-coverage -r coverage.xml
 
-jobs:
-  include:
-    - stage: deploy to PyPI
-      script: echo "Deploying to PyPI"
-      deploy:
-        provider: pypi
-        user: mortele
-        password: $PYPI_PASSWORD
-        on:
-          tags: true
-          python: 3.7.0
+script:
+  - if [ $COV == 'true' ];
+    then pytest -v -s --cov=./;
+    else pytest -v -s;
+    fi
+
+after_success:
+  - if [ $COV == 'true' ]; then codecov -t $CODECOV_PROJECT_TOKEN; fi
+  - if [ $COV == 'true' ]; then coverage xml; fi
+  - if [ $COV == 'true' ]; then python-codacy-coverage -r coverage.xml; fi
+
+deploy:
+  provider: pypi
+  user: mortele
+  password: $PYPI_PASSWORD
+  on:
+    tags: true
+    python: 3.7
+
