@@ -46,53 +46,15 @@ def _write_molecule(out_file, number, x, y, z, atoms_per_mol=1, label='Ar',
     out_file.write('\n')
 
 
-def _generate_uniform_random_stable(n_particles, box, max_iter=1000,
-                                    threshold=0.2):
-    x_box, y_box, z_box = box
-    x = np.random.uniform(low=0.0, high=x_box, size=(n_particles))
-    y = np.random.uniform(low=0.0, high=y_box, size=(n_particles))
-    z = np.random.uniform(low=0.0, high=z_box, size=(n_particles))
-    dist = np.zeros(shape=(n_particles, n_particles))
-    for iter in range(1, max_iter+1):
-        for i, (xi, yi, zi) in enumerate(zip(x, y, z)):
-            for j, (xj, yj, zj) in enumerate(zip(x, y, z)):
-                dist[i, j] = (xj - xi)**2 + (yj - yi)**2 + (zj - zi)**2
-        max_dist = np.max(np.max(dist))
-        if max_dist < threshold**2:
-            break
-        if iter == max_iter:
-            error_str = (f'Unable to find a relaxed configuration of '
-                         f'{n_particles} particles in {max_iter} iterations. '
-                         f'Max distance found: {max_dist} > the threshold '
-                         f' set to {threshold}.')
-            raise RuntimeError(error_str)
-        for (i, j), d in np.ndenumerate(dist):
-            if d < threshold**2:
-                pj = np.random.uniform(low=0.0, high=1.0, size=(3))
-                x[j] = pj[0] * x_box
-                y[j] = pj[1] * y_box
-                z[j] = pj[2] * z_box
-    return x, y, z
-
-
-def generate_uniform_random(n_particles, box, path='', stable=False, **kwargs):
-    if stable:
-        x_stable, y_stable, z_stable = (
-            _generate_uniform_random_stable(n_particles, box, **kwargs)
-        )
+def generate_uniform_random(n_particles, box, path=''):
     file_name = _check_if_path(path)
 
     x_box, y_box, z_box = box
 
     with open(file_name, 'w') as out_file:
-        if not stable:
-            x = np.random.uniform(low=0.0, high=x_box, size=(n_particles))
-            y = np.random.uniform(low=0.0, high=y_box, size=(n_particles))
-            z = np.random.uniform(low=0.0, high=z_box, size=(n_particles))
-        else:
-            x = x_stable
-            y = y_stable
-            z = z_stable
+        x = np.random.uniform(low=0.0, high=x_box, size=(n_particles))
+        y = np.random.uniform(low=0.0, high=y_box, size=(n_particles))
+        z = np.random.uniform(low=0.0, high=z_box, size=(n_particles))
 
         _write_box(out_file, box)
         _write_n_particles(out_file, n_particles)
