@@ -6,7 +6,8 @@ from .generate_fort5 import generate_uniform_random, generate_fcc
 from .replace_in_fort1 import replace_in_fort1
 from .replace_in_fort3 import Fort3Replacement, replace_in_fort3
 from .histogram import histogram
+from .compute_gr import compute_gr
 
 __all__ = ['OccamData', 'Fort1', 'Fort7', 'Xyz', 'generate_uniform_random',
            'generate_fcc', 'replace_in_fort1', 'Fort3Replacement',
-           'replace_in_fort3', 'histogram']
+           'replace_in_fort3', 'histogram', 'compute_gr']
