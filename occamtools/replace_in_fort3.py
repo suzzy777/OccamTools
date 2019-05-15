@@ -122,6 +122,8 @@ def _is_int(s):
             return False
     except ValueError:
         return False
+    except TypeError:
+        return False
 
 
 def _count_existing_instances(fort_file):
