@@ -137,7 +137,8 @@ def _check_constructor_input(*args, silent=False):
 class OccamData:
     save_dir = 'class_data'
 
-    def __init__(self, *args, load_from_npy=True, silent=False):
+    def __init__(self, *args, load_from_npy=True, save_to_npy=True,
+                 silent=False):
         npy_loaded = False
         if len(args) == 1 and load_from_npy:
             check, class_path = _check_npy_dump_exists(args[0])
@@ -157,7 +158,8 @@ class OccamData:
             self.fort1_file_name = fort1.file_name
             self.fort7_file_name = fort7.file_name
             self.xyz_file_name = xyz.file_name
-            self.save()
+            if save_to_npy:
+                self.save()
 
     def save(self, overwrite=False):
         self.save_path = os.path.join(os.path.dirname(self.fort1_file_name),
