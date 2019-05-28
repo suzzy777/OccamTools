@@ -84,7 +84,7 @@ class Xyz:
             in_file.seek(0)
 
             self.n_particles = int(in_file.readline())
-            self.n_time_steps_ = self.num_lines // self.n_particles
+            self.n_time_steps_ = self.num_lines // (self.n_particles + 2)
             self._allocate_arrays()
             line = in_file.readline()
             self._parse_comment_first(line)
