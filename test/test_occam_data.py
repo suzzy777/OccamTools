@@ -211,3 +211,9 @@ def test_occam_data_progress_bars():
         assert _check_equal(occam_data_silent.__dict__[key],
                             occam_data_verbose_npy.__dict__[key])
     shutil.rmtree(class_dir)
+
+
+def test_occam_data_not_save_to_npy():
+    assert not os.path.exists(class_dir)
+    _ = OccamData(file_name_fort_1, save_to_npy=False)
+    assert not os.path.exists(class_dir)
