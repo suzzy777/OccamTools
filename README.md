@@ -109,6 +109,7 @@ OCCAM is a program for Molecular Dynamics Simulations able to perform Hybrid Par
 
 Changelog
 ---------
+**0.3.3**: Add option to not save `.npy` files when loading `OccamData` objects. Fix a bug causing errors when reading very short `.xyz` files. Fix a bug causing the grid size to not correctly update when using `replace_in_fort3`. <br>
 **0.3.2**: Add testing with python alpha version `3.8-dev`, stream line travis integration and coverage reporting. <br>
 **0.3.1**: Move the `bins` keyword argument to `histogram` from an explicit argument to `**kwargs` handled by `np.histogram`. <br>
 **0.3.0**: Add histogram computation capabilities. <br>
