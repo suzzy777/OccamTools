@@ -215,5 +215,5 @@ def test_occam_data_progress_bars():
 
 def test_occam_data_not_save_to_npy():
     assert not os.path.exists(class_dir)
-    _ = OccamData(file_name_fort_1, save_to_npy=False)
+    _ = OccamData(file_name_fort_1, save_to_npy=False, silent=True)
     assert not os.path.exists(class_dir)

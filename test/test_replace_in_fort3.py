@@ -578,3 +578,24 @@ def test_replace_in_fort3():
 
     if os.path.exists(out_file) and os.path.isfile(out_file):
         os.remove(out_file)
+
+
+def test_replace_in_fort3_replace_scf():
+    inps = [[3, 4, 5], (3, 4, 5), '3 4 5', ['3 4 5'], np.array([3, 4, 5])]
+    for scf_new in inps:
+        replace_1 = Fort3Replacement(property='scf', replace=True,
+                                     content=scf_new)
+        out_path = replace_in_fort3(file_name, None, replace_1)
+        _, _, _, _, _, _, scf, _, _ = _parse_fort_3_file(out_path)
+        for expected, found in zip([3, 4, 5], scf):
+            assert expected == found
+
+    inps = [9, np.array([9]), [9], (9), '9']
+    for scf_new in inps:
+        replace_1 = Fort3Replacement(property='scf', replace=True,
+                                     content=scf_new)
+        out_path = replace_in_fort3(file_name, None, replace_1)
+        _, _, _, _, _, _, scf, _, _ = _parse_fort_3_file(out_path)
+        for expected, found in zip([9, 9, 9], scf):
+            assert expected == found
+    os.remove(out_path)

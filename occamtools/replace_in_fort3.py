@@ -370,6 +370,35 @@ def _check_new_kappa(kappa_, *args):
     return kappa
 
 
+def _check_new_scf(scf_, *args):
+    scf = deepcopy(scf_)
+    for arg in args:
+        if arg.property == _Properties.SCF:
+            content = arg._content
+            if (isinstance(content, list) or isinstance(content, tuple)):
+                if len(content) == 1:
+                    if isinstance(content[0], str):
+                        return [int(s) for s in content[0].split()]
+                    else:
+                        return [int(content[0]) for _ in range(3)]
+                else:
+                    return content
+            elif hasattr(content, 'shape'):
+                if len(content) == 1:
+                    return [content[0] for _ in range(3)]
+                else:
+                    return content
+            elif isinstance(content, str):
+                if len(content.split()) == 1:
+                    return [int(content) for _ in range(3)]
+                else:
+                    return [int(s) for s in content.split()]
+            else:
+                return [content for _ in range(3)]
+
+    return scf
+
+
 def _write_fort3_from_replace_objects(atom_names, atoms, bonds, angles,
                                       torsions, non_bonds, scf, kappa, chi,
                                       old_atom_names, file_path):
@@ -489,6 +518,7 @@ def replace_in_fort3(input_file, output_path, *args):
     non_bonds = _sort_new_replace_args_bonds(atom_names, non_bonds, *args,
                                              non_bond=True)
     kappa = _check_new_kappa(kappa, *args)
+    scf = _check_new_scf(scf, *args)
     chi = _construct_new_chi(atom_names, old_atom_names, chi)
     _write_fort3_from_replace_objects(atom_names, atoms, bonds, angles,
                                       torsions, non_bonds, scf, kappa, chi,
