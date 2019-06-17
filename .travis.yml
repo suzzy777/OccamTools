@@ -25,7 +25,7 @@ script:
     fi
 
 after_success:
-  - if [ $COV == 'true' ]; then codecov -t $CODECOV_PROJECT_TOKEN; fi
+  - if [ $COV == 'true' ]; then codecov; fi
   - if [ $COV == 'true' ]; then coverage xml; fi
   - if [ $COV == 'true' ]; then python-codacy-coverage -r coverage.xml; fi
 
@@ -36,4 +36,3 @@ deploy:
   on:
     tags: true
     python: 3.7
-
