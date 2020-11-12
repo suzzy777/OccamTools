@@ -10,8 +10,8 @@ matrix:
   include:
     - python: 3.6
     - python: 3.7
+    - python: 3.8
       env: COV=true
-    - python: 3.8-dev
 
 install:
   - if [ $COV == 'true' ]; then pip3 install codecov; fi
@@ -35,4 +35,4 @@ deploy:
   password: $PYPI_PASSWORD
   on:
     tags: true
-    python: 3.7
+    python: 3.8

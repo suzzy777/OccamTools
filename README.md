@@ -83,23 +83,13 @@ print(plot(kinetic_energy_deviations.tolist()))
 Behind the scenes, `.npy` (for numpy arrays) and `.json` (for anything else) files are used to represent the simulation data. By default, loading a simulation run causes the saving of small (relative to the original `fort.5/7/8`) binary files containing the data. These are used to load from on subsequent calls. This means calls to `OccamData.load('your/file/here')` of `OccamData('your/file/here')` will be significantly faster *after* the first call. In this specific example, a 25x speedup is achieved (but your mileage may vary).
 ![load example](https://i.imgur.com/Wssbx9B.gif)
 
-Running tests with `tox`
+Running tests
 ---------
-Assuming python `3.7` is already installed, install separate `3.6` and `3.8` instances using `pyenv` by
+Inside the `occamtools` directory, do
 ```bash
-> brew install pyenv
-> pyenv install 3.6.6
-> pyenv install 3.8-dev
+> pip3 install pytest
+> pytest -v
 ```
-and then inside the `occamtools` directory do
-```bash
-> git clone git@github.com:mortele/OccamTools.git occamtools
-> cd occamtools
-> pyenv local 3.6.6 3.8-dev
-> pip3 install tox-pyenv
-> tox
-```
-which will run unit tests (using `pytest`) with python versions `3.6`, `3.7`, and the `3.8` development build.
 
 OCCAM
 ---------

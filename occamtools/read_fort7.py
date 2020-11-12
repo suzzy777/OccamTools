@@ -11,6 +11,8 @@ class Fort7:
         self.step = np.zeros(self.n_time_steps)
         self.kinetic_energy = np.zeros(self.n_time_steps)
         self.potential_energy = np.zeros(self.n_time_steps)
+        self.bond_energy = np.zeros(self.n_time_steps)
+        self.angle_energy = np.zeros(self.n_time_steps)
         self.temperature = np.zeros(self.n_time_steps)
         self.pressure = np.zeros(self.n_time_steps)
         self.pressure_nb = np.zeros(self.n_time_steps)
@@ -22,6 +24,8 @@ class Fort7:
         self.step = self.step[:i]
         self.kinetic_energy = self.kinetic_energy[:i]
         self.potential_energy = self.potential_energy[:i]
+        self.bond_energy = self.bond_energy[:i]
+        self.angle_energy = self.angle_energy[:i]
         self.temperature = self.temperature[:i]
         self.pressure = self.pressure[:i]
         self.pressure_nb = self.pressure_nb[:i]
@@ -60,6 +64,10 @@ class Fort7:
                     self.kinetic_energy[i] = float(line[1])
                 elif 'epot shifted' in ' '.join(line):
                     self.potential_energy[i] = float(line[1])
+                elif 'vbond' in ' '.join(line):
+                    self.bond_energy[i] = float(line[1])
+                elif 'vangle' in ' '.join(line):
+                    self.angle_energy[i] = float(line[1])
                 elif 'temp' in line[-1]:
                     self.temperature[i] = float(line[1])
                 elif line[-1] == 'press':
