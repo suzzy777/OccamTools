@@ -195,6 +195,7 @@ def test_occam_data_save_load():
 
 
 def test_occam_data_progress_bars():
+    shutil.rmtree(class_dir)
     fort1, fort7, fort8 = _load_default_forts()
     occam_data_silent = OccamData(fort1, fort7, fort8)
     fort1, fort7, fort8 = _load_default_forts(silent=False)
